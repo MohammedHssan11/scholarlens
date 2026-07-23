@@ -39,3 +39,13 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# --- ScholarLens ---
+# Approved research papers: never commit copyrighted PDFs to a public repo.
+data/corpus/*
+!data/corpus/README.md
+
+# Local env
+.env
+.env.local
+.env*.local

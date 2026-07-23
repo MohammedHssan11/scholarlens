@@ -1,36 +1,81 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ScholarLens — Research Evidence Navigator
 
-## Getting Started
+**Team 01 · AI in Applications (Production Training)**
 
-First, run the development server:
+A research evidence workspace that answers **only from approved papers**, shows the exact
+source snippet behind every claim, compares papers, and safely says *"no evidence found"*
+instead of inventing an answer.
+
+---
+
+## The golden rule
+
+> Every answer must show at least one traceable source snippet — or clearly state that
+> evidence was not found. Never fabricate a source.
+
+---
+
+## Main workflow
+
+1. Upload / select an approved paper collection
+2. Ask a research question
+3. Retrieve relevant evidence (from the approved corpus only)
+4. Return a structured synthesis with source snippets
+5. Compare papers
+6. Export an evidence matrix
+
+## Mandatory MVP
+
+Paper library · question form · grounded evidence answer · source panel ·
+paper-comparison matrix · research-readiness checklist · export
+
+## Out of scope
+
+Open-ended whole-web research · fabricated citations · automatic academic conclusions ·
+uploading confidential unpublished work without permission.
+
+---
+
+## Setup
 
 ```bash
+npm install
+cp .env.example .env.local   # then fill in your keys
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000/scholarlens
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run lint     # lint
+npm run build    # production build
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## Who owns what
 
-To learn more about Next.js, take a look at the following resources:
+| Area | Owner | Main folders |
+|---|---|---|
+| Architecture, integration, deployment, release | **Mohammed Hassan Mahmoud** (Lead) | `docs/`, `.github/`, env & deploy |
+| Frontend / user workflow | **Mohammed Hassan Mahmoud** | `src/app/scholarlens/`, `src/components/` |
+| AI & backend | **AlBaraa** | `src/app/api/`, `src/lib/ai/`, `src/lib/scholarlens/` |
+| Approved knowledge & tools | **Mariam Eladawy** | `knowledge/`, `data/corpus/`, `docs/source-register.md`, `taxonomy.ts`, `tool-rules.ts` |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+> Team note: Ahmed Mossad and Mariam Ali withdrew from the training. Their work was
+> redistributed with Dr. Ahmed's approval — see `docs/architecture.md`.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## Branch rules
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+`main` (production) ← `dev` (integration) ← `feat/*` (each person's work).
+Never push directly to `main` or `dev`. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Documentation
+
+- [Architecture](docs/architecture.md)
+- [API contracts](docs/api-contracts.md)
+- [Source register](docs/source-register.md)
+- [Release checklist](docs/release-checklist.md)
+- [Known limitations](docs/known-limitations.md)
