@@ -9,7 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "next": "16.2.11",
+    "next": "^16.2.11",
     "react": "19.2.4",
     "react-dom": "19.2.4"
   },
@@ -22,5 +22,10 @@
     "eslint-config-next": "16.2.11",
     "tailwindcss": "^4",
     "typescript": "^5"
+  },
+  "allowScripts": {
+    "es5-ext@0.10.64": true,
+    "unrs-resolver@1.12.2": true,
+    "sharp@0.34.5": true
   }
 }
