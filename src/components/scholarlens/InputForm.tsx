@@ -53,7 +53,7 @@ export default function InputForm() {
           name="question"
           value={question}
           onChange={(event) => setQuestion(event.target.value)}
-          placeholder="e.g. Which methods are used to measure X?"
+          placeholder="Ask me anything about research or AI..."
           className="rounded-lg border border-slate-300 px-4 py-3 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
           required
         />
@@ -62,7 +62,7 @@ export default function InputForm() {
           disabled={loading || question.trim().length === 0}
           className="self-start rounded-lg bg-blue-700 px-5 py-2.5 font-medium text-white disabled:opacity-50"
         >
-          {loading ? "Searching…" : "Ask"}
+          {loading ? "Searching…" : "Ask ScholarLens"}
         </button>
       </form>
 
