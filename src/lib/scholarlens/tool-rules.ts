@@ -12,9 +12,9 @@
 
 export const READINESS_RULES = {
   /** Minimum distinct approved papers before an answer counts as "ready". */
-  minPapers: 2,
+  minPapers: 3,
   /** Minimum length of a snippet for it to count as real evidence. */
-  minSnippetChars: 20,
+  minSnippetChars: 30,
 } as const;
 
 export const SOURCE_QUALITY_RULES = {

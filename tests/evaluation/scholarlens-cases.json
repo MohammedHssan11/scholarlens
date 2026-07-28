@@ -5,14 +5,42 @@
     {
       "id": "normal-01",
       "type": "normal",
-      "question": "TODO: a question the approved corpus can answer",
+      "question": "What is Agentic Retrieval-Augmented Generation (Agentic RAG)?",
       "expected_source_ids": ["paper-001"],
+      "expect_not_found": false
+    },
+    {
+      "id": "normal-02",
+      "type": "normal",
+      "question": "How does Agentic RAG improve traditional Retrieval-Augmented Generation?",
+      "expected_source_ids": ["paper-005"],
+      "expect_not_found": false
+    },
+    {
+      "id": "normal-03",
+      "type": "normal",
+      "question": "What reasoning strategies are used in Agentic RAG systems?",
+      "expected_source_ids": ["paper-002"],
+      "expect_not_found": false
+    },
+    {
+      "id": "normal-04",
+      "type": "normal",
+      "question": "What research gaps are identified for Agentic RAG?",
+      "expected_source_ids": ["paper-004"],
+      "expect_not_found": false
+    },
+    {
+      "id": "normal-05",
+      "type": "normal",
+      "question": "How does GraphRAG support Agentic RAG systems?",
+      "expected_source_ids": ["paper-007", "paper-010"],
       "expect_not_found": false
     },
     {
       "id": "not-found-01",
       "type": "not_found",
-      "question": "TODO: a question clearly outside the corpus topic",
+      "question": "What are the latest advances in quantum computing error correction?",
       "expected_source_ids": [],
       "expect_not_found": true
     },
