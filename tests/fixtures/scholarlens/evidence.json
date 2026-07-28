@@ -1,0 +1,85 @@
+{
+  "_owner": "AlBaraa (AI & Backend Engineer)",
+  "_note": "Sample evidence items for testing tools.ts and service.ts. These are deterministic test data — not AI output.",
+
+  "three_papers": [
+    {
+      "question": "What methods are used to measure reading comprehension?",
+      "source_id": "paper-001",
+      "title": "Assessment Methods in Primary Education",
+      "key_finding": "Standardized tests remain the dominant assessment tool despite growing criticism.",
+      "evidence_snippet": "\"Our survey of 120 schools found that 87% rely on standardized reading tests as their primary assessment instrument.\"",
+      "agreement": "Consistent with paper-002's finding on test prevalence.",
+      "disagreement": "N/A",
+      "research_gap": "Does not address alternative assessment methods.",
+      "limitation": "Survey limited to urban schools only.",
+      "confidence": "high"
+    },
+    {
+      "question": "What methods are used to measure reading comprehension?",
+      "source_id": "paper-002",
+      "title": "Beyond Multiple Choice: Rethinking Assessment",
+      "key_finding": "Portfolio-based assessment shows higher diagnostic accuracy for reading difficulties.",
+      "evidence_snippet": "\"Portfolio assessment identified 23% more students with reading difficulties compared to standardized tests (p < 0.01).\"",
+      "agreement": "Agrees with paper-001 that standardized tests are widespread.",
+      "disagreement": "Argues that standardized tests miss many struggling readers.",
+      "research_gap": "Long-term outcomes of portfolio assessment not studied.",
+      "limitation": "Small sample size (n=45).",
+      "confidence": "medium"
+    },
+    {
+      "question": "What methods are used to measure reading comprehension?",
+      "source_id": "paper-003",
+      "title": "Digital Tools for Literacy Assessment",
+      "key_finding": "AI-assisted reading assessment reduces teacher workload by 40%.",
+      "evidence_snippet": "\"Teachers using the AI tool reported 40% less time spent on assessment activities while maintaining diagnostic accuracy.\"",
+      "agreement": "N/A — novel approach not covered by other papers.",
+      "disagreement": "N/A",
+      "research_gap": "Equity implications of AI-based assessment not addressed.",
+      "limitation": "Pilot study — not yet validated at scale.",
+      "confidence": "low"
+    }
+  ],
+
+  "single_paper": [
+    {
+      "question": "What are the limitations of standardized testing?",
+      "source_id": "paper-001",
+      "title": "Assessment Methods in Primary Education",
+      "key_finding": "Standardized tests may not capture the full range of student abilities.",
+      "evidence_snippet": "\"Our analysis reveals that standardized tests consistently under-identify creative and critical thinking skills.\"",
+      "agreement": "N/A — single source.",
+      "disagreement": "N/A",
+      "research_gap": "",
+      "limitation": "Limited to reading assessment only.",
+      "confidence": "medium"
+    }
+  ],
+
+  "empty_snippets": [
+    {
+      "question": "What is X?",
+      "source_id": "paper-001",
+      "title": "Paper with no snippet",
+      "key_finding": "Some finding",
+      "evidence_snippet": "",
+      "agreement": "",
+      "disagreement": "",
+      "research_gap": "",
+      "limitation": "",
+      "confidence": "low"
+    },
+    {
+      "question": "What is X?",
+      "source_id": "paper-002",
+      "title": "Another paper with snippet",
+      "key_finding": "Another finding",
+      "evidence_snippet": "\"This is an actual snippet.\"",
+      "agreement": "",
+      "disagreement": "",
+      "research_gap": "Gap identified here.",
+      "limitation": "",
+      "confidence": "medium"
+    }
+  ]
+}
