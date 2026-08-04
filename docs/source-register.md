@@ -17,16 +17,16 @@ The following papers form the initial trusted knowledge corpus for ScholarLens. 
 
 | source_id | Title | Author / Organisation | Year | URL / DOI | Accessed | Licence / Usage | Approved by |
 |-----------|-------|----------------------|------|-----------|----------|-----------------|-------------|
-| paper-001 | Agentic Retrieval-Augmented Generation: A Survey on Agentic RAG | TBD | 2025 | arXiv:2501.09136 | 28 Jul 2026 | arXiv licence (verification required before distribution) | TBD |
-| paper-002 | Reasoning RAG via System 1 or System 2: A Survey on Reasoning Agentic Retrieval-Augmented Generation for Industry Challenges | TBD | 2025 | arXiv:2506.10408 | 28 Jul 2026 | arXiv licence (verification required before distribution) | TBD |
-| paper-003 | Retrieval-Augmented Generation: A Comprehensive Survey of Architectures, Enhancements, and Robustness Frontiers | TBD | 2025 | arXiv:2506.00054 | 28 Jul 2026 | arXiv licence (verification required before distribution) | TBD |
-| paper-004 | A Systematic Review of Key Retrieval-Augmented Generation (RAG) Systems: Progress, Gaps, and Future Directions | TBD | 2025 | arXiv:2507.18910 | 28 Jul 2026 | arXiv licence (verification required before distribution) | TBD |
-| paper-005 | Agentic Retrieval-Augmented Generation: Advancing AI-Driven Information Retrieval and Processing | TBD | 2025 | Official publication URL / DOI (to be confirmed) | 28 Jul 2026 | Licence to be verified | TBD |
-| paper-006 | MMA-RAG: A Survey on Multimodal Agentic Retrieval-Augmented Generation | TBD | 2025 | Official publication URL / DOI (to be confirmed) | 28 Jul 2026 | Licence to be verified | TBD |
-| paper-007 | Graph-Based Agentic Retrieval-Augmented Generation: A Comprehensive Survey | TBD | 2025 | Official publication URL / DOI (to be confirmed) | 28 Jul 2026 | Licence to be verified | TBD |
-| paper-008 | Ask in Any Modality: A Comprehensive Survey on Multimodal Retrieval-Augmented Generation | TBD | 2025 | arXiv:2502.08826 | 28 Jul 2026 | arXiv licence (verification required before distribution) | TBD |
-| paper-009 | Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks | Patrick Lewis et al. | 2020 | arXiv:2005.11401 | 28 Jul 2026 | arXiv licence (verification required before distribution) | TBD |
-| paper-010 | From Local to Global: A GraphRAG Approach to Query-Focused Summarization | Microsoft Research | 2024 | Official publication URL / DOI (to be confirmed) | 28 Jul 2026 | Licence to be verified | TBD |
+| paper-001 | Agentic Retrieval-Augmented Generation: A Survey on Agentic RAG | TBD | 2025 | arXiv:2501.09136 | 28 Jul 2026 | arXiv licence (verification required before distribution) | Mohammed Hassan Mahmoud |
+| paper-002 | Reasoning RAG via System 1 or System 2: A Survey on Reasoning Agentic Retrieval-Augmented Generation for Industry Challenges | TBD | 2025 | arXiv:2506.10408 | 28 Jul 2026 | arXiv licence (verification required before distribution) | Mohammed Hassan Mahmoud |
+| paper-003 | Retrieval-Augmented Generation: A Comprehensive Survey of Architectures, Enhancements, and Robustness Frontiers | TBD | 2025 | arXiv:2506.00054 | 28 Jul 2026 | arXiv licence (verification required before distribution) | Mohammed Hassan Mahmoud |
+| paper-004 | A Systematic Review of Key Retrieval-Augmented Generation (RAG) Systems: Progress, Gaps, and Future Directions | TBD | 2025 | arXiv:2507.18910 | 28 Jul 2026 | arXiv licence (verification required before distribution) | Mohammed Hassan Mahmoud |
+| paper-005 | Agentic Retrieval-Augmented Generation: Advancing AI-Driven Information Retrieval and Processing | TBD | 2025 | Official publication URL / DOI (to be confirmed) | 28 Jul 2026 | Licence to be verified | Mohammed Hassan Mahmoud |
+| paper-006 | MMA-RAG: A Survey on Multimodal Agentic Retrieval-Augmented Generation | TBD | 2025 | Official publication URL / DOI (to be confirmed) | 28 Jul 2026 | Licence to be verified | Mohammed Hassan Mahmoud |
+| paper-007 | Graph-Based Agentic Retrieval-Augmented Generation: A Comprehensive Survey | TBD | 2025 | Official publication URL / DOI (to be confirmed) | 28 Jul 2026 | Licence to be verified | Mohammed Hassan Mahmoud |
+| paper-008 | Ask in Any Modality: A Comprehensive Survey on Multimodal Retrieval-Augmented Generation | TBD | 2025 | arXiv:2502.08826 | 28 Jul 2026 | arXiv licence (verification required before distribution) | Mohammed Hassan Mahmoud |
+| paper-009 | Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks | Patrick Lewis et al. | 2020 | arXiv:2005.11401 | 28 Jul 2026 | arXiv licence (verification required before distribution) | Mohammed Hassan Mahmoud |
+| paper-010 | From Local to Global: A GraphRAG Approach to Query-Focused Summarization | Microsoft Research | 2024 | Official publication URL / DOI (to be confirmed) | 28 Jul 2026 | Licence to be verified | Mohammed Hassan Mahmoud |
 
 ---
 
@@ -144,4 +144,4 @@ The current corpus **does not** cover:
 - [x] Evaluation test cases reference approved source IDs only.
 - [ ] Author metadata fully verified.
 - [ ] Licence verification completed.
-- [ ] Final knowledge corpus approved by the project lead.
+- [x] Final knowledge corpus approved by the project lead. — Mohammed Hassan Mahmoud, 4 Aug 2026 (topic and sources approved; author-name and licence verification for papers 001–008 still tracked as an open item with Mariam).
