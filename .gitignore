@@ -49,3 +49,6 @@ data/corpus/*
 .env
 .env.local
 .env*.local
+
+# Git Credential Manager diagnostic logs
+gcm-diagnose.log

@@ -52,16 +52,87 @@ These cases verify:
 
 ---
 
-# Deterministic Rule Review
+## Deterministic Rule Review
 
-The following deterministic rules have been defined:
+The following deterministic rules have been defined and validated.
 
-- Minimum number of approved papers required for research readiness
-- Minimum evidence snippet length
-- Required metadata for approved sources
-- Licence verification requirement before approval
+### Rule 1 — Minimum Approved Papers
 
-These rules are deterministic and can be unit tested without relying on AI-generated responses.
+**Rule**
+
+Research answers must be supported using approved papers from the trusted corpus.
+
+**Example**
+
+Question:
+> "How does Agentic RAG improve traditional RAG?"
+
+Evidence:
+- paper-001
+- paper-005
+
+Result:
+The answer is considered valid because it references approved sources only.
+
+---
+
+### Rule 2 — Evidence Traceability
+
+**Rule**
+
+Every factual statement must be traceable to an exact evidence snippet from an approved paper.
+
+**Example**
+
+Claim:
+> "Agentic RAG introduces autonomous planning."
+
+Supporting evidence:
+paper-001
+
+Result:
+The claim can be traced directly to the approved corpus.
+
+---
+
+### Rule 3 — Required Source Metadata
+
+**Rule**
+
+Every approved source must contain:
+
+- source_id
+- title
+- author(s)
+- publication year
+- URL or DOI
+- access date
+- licence information
+
+**Example**
+
+paper-003 contains all required metadata.
+
+Result:
+Metadata validation passes.
+
+---
+
+### Rule 4 — Licence Verification
+
+**Rule**
+
+Only legally usable publications may become part of the trusted corpus.
+
+**Example**
+
+paper-001
+
+Licence:
+arXiv licence (verification required before distribution)
+
+Result:
+The paper may be used during development while licence verification remains tracked before production release.
 
 ---
 
