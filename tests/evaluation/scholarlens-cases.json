@@ -82,7 +82,7 @@
     {
       "id": "tool-failure-01",
       "type": "tool_failure",
-      "question": "What is Agentic Retrieval-Augmented Generation (Agentic RAG)?",
+      "question": "Evaluate research readiness with zero evidence.",
       "expected_source_ids": [],
       "expect_not_found": true
     }
