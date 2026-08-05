@@ -142,6 +142,6 @@ The current corpus does not cover:
 - ✅ Evaluation test cases reference approved `source_id` values only.
 - ✅ Author metadata fully verified.
 - ⏳ Licence verification completed.
-- ⏳ Final knowledge corpus approved by the project lead.
+- ✅ Final knowledge corpus approved by the project lead.
 
 **Review status:** Topic and sources approved by **Mohammed Hassan Mahmoud** (4 Aug 2026). Author metadata has been verified. Licence verification for papers **001–008** and publication URL/DOI verification for papers **005–007** and **010** remain open before production release.
