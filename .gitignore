@@ -44,6 +44,7 @@ next-env.d.ts
 # Approved research papers: never commit copyrighted PDFs to a public repo.
 data/corpus/*
 !data/corpus/README.md
+!data/corpus/manifest.json
 
 # Local env
 .env

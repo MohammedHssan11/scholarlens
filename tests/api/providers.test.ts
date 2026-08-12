@@ -18,7 +18,7 @@
  *
  * DETERMINISTIC: These tests do not make any network calls.
  */
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import {
   ProviderError,
   isProviderConfigured,

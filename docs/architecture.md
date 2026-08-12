@@ -29,7 +29,7 @@ sent to the browser or included in the client bundle.
 
 | Layer | Files | Owner |
 |---|---|---|
-| UI / workflow | `src/app/scholarlens/`, `src/components/` | Mohammed |
+| UI / workflow | `src/app/scholarlens/`, `src/components/` | farkadaa |
 | API + validation | `src/app/api/scholarlens/route.ts`, `src/lib/scholarlens/schema.ts` | AlBaraa |
 | AI providers | `src/lib/ai/providers.ts` | AlBaraa |
 | Grounding / retrieval | `src/lib/scholarlens/service.ts` | AlBaraa |
@@ -43,7 +43,7 @@ sent to the browser or included in the client bundle.
 - **Ahmed Mossad Elgammal** (Evaluation & Production) withdrew. Work redistributed with
   Dr. Ahmed's approval.
 - **Mariam Ali Ahmed** (Product UI & Workflow) withdrew. The frontend and user-workflow
-  ownership moved to the Integration Lead.
+  ownership moved to farkadaa.
 
 ## Open decision
 

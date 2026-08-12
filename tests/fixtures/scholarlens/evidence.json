@@ -81,5 +81,44 @@
       "limitation": "",
       "confidence": "medium"
     }
+  ],
+
+  "verification_failures": [
+    {
+      "question": "What methods are used?",
+      "source_id": "paper-999",
+      "title": "Hallucinated Paper",
+      "key_finding": "AI sometimes makes up sources.",
+      "evidence_snippet": "\"This source ID does not exist in the manifest.\"",
+      "agreement": "",
+      "disagreement": "",
+      "research_gap": "",
+      "limitation": "",
+      "confidence": "low"
+    },
+    {
+      "question": "What methods are used?",
+      "source_id": "paper-001",
+      "title": "Wrong Title Mismatch",
+      "key_finding": "Title must match exactly.",
+      "evidence_snippet": "\"Our survey of 120 schools found that 87% rely on standardized reading tests as their primary assessment instrument.\"",
+      "agreement": "",
+      "disagreement": "",
+      "research_gap": "",
+      "limitation": "",
+      "confidence": "low"
+    },
+    {
+      "question": "What methods are used?",
+      "source_id": "paper-001",
+      "title": "Assessment Methods in Primary Education",
+      "key_finding": "Snippet must be exact.",
+      "evidence_snippet": "A paraphrased version of the quote that won't pass the substring check.",
+      "agreement": "",
+      "disagreement": "",
+      "research_gap": "",
+      "limitation": "",
+      "confidence": "low"
+    }
   ]
 }

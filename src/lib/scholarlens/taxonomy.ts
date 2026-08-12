@@ -2,8 +2,8 @@
  * Domain vocabulary for ScholarLens.
  * Owner: Mariam Eladawy (Knowledge & Tooling Engineer).
  *
- * TODO(Mariam Eladawy): fill these in for the chosen narrow research topic,
- * and document each one with an example in `docs/source-register.md`.
+ * This taxonomy defines the vocabulary used to query our RAG/AI agent corpus.
+ * See `docs/source-register.md` for specific examples.
  */
 
 /** The structured fields every answer must provide. */

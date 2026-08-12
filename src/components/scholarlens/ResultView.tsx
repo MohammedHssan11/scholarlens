@@ -1,6 +1,6 @@
 /**
  * Renders the structured answer.
- * Owner: Mohammed Hassan Mahmoud (frontend).
+ * Owner: farkadaa (Frontend Lead)
  */
 import type { ScholarLensResponse } from "@/lib/scholarlens/schema";
 import EvidencePanel from "./EvidencePanel";

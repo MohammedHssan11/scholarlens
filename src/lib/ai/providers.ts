@@ -257,14 +257,15 @@ async function callGroq(
 // ─── Gemini Provider ─────────────────────────────────────────────────────────
 
 /**
- * Call Gemini API with structured output and optional File Search grounding.
+ * Call Gemini API with structured output.
  *
  * Uses response_mime_type "application/json" with response_schema for
- * structured output enforcement. When a File Search store is configured,
- * retrieval is done automatically by the Gemini API.
+ * structured output enforcement. Retrieval always happens in the local
+ * AgentRAG layer before this function is called, so Gemini sees the same
+ * approved context as Groq and cannot search an unfiltered external store.
  *
  * @param question  - The user's research question (Zod-validated).
- * @param context   - Retrieved text chunks (may be empty if File Search is used).
+ * @param context   - Retrieved text chunks from the approved corpus.
  * @param paperIds  - Approved paper IDs to constrain source references.
  * @returns Parsed evidence items.
  * @throws ProviderError on timeout, API error, or schema mismatch.
@@ -296,25 +297,6 @@ async function callGemini(
   );
 
   try {
-    /**
-     * Build the Gemini request configuration.
-     *
-     * If GEMINI_FILE_SEARCH_STORE_ID is set, we include the file_search
-     * tool so Gemini retrieves context from the approved corpus store.
-     * Otherwise, we pass the pre-retrieved context in the prompt.
-     */
-    const fileSearchStoreId = process.env.GEMINI_FILE_SEARCH_STORE_ID;
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const tools: any[] = [];
-    if (fileSearchStoreId) {
-      tools.push({
-        fileSearch: {
-          fileSearchStoreNames: [fileSearchStoreId],
-        },
-      });
-    }
-
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash",
       contents: [
@@ -335,7 +317,6 @@ async function callGemini(
         systemInstruction: EVIDENCE_EXTRACTION_PROMPT.system,
         responseMimeType: "application/json",
         responseSchema: EVIDENCE_RESPONSE_JSON_SCHEMA.schema,
-        ...(tools.length > 0 ? { tools } : {}),
       },
     });
 

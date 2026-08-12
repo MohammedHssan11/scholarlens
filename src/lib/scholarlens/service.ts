@@ -11,17 +11,18 @@
  *   This module sits between the route handler and the provider layer.
  *   It is responsible for:
  *     1. Validating paper IDs against the approved corpus manifest.
- *     2. Retrieving context from the approved corpus (or delegating to
- *        Gemini File Search if a store is configured).
+ *     2. Retrieving context from the approved corpus via AgentRAG.
  *     3. Calling the provider fallback chain for evidence extraction.
  *     4. Filtering AI output to ensure only approved paper IDs are cited.
- *     5. Assembling the final typed response.
- *     6. Running deterministic tools (compare_papers, research_readiness).
+ *     5. Verifying evidence snippets against original retrieved text.
+ *     6. Assembling the final typed response.
+ *     7. Running deterministic tools (compare_papers, research_readiness).
  *
  * DETERMINISTIC vs AI BOUNDARY:
  *   - Paper ID validation: DETERMINISTIC (allowlist check)
- *   - Evidence retrieval: AI (Gemini File Search)
+ *   - Evidence retrieval: DETERMINISTIC (AgentRAG keyword/TF-IDF search)
  *   - Evidence extraction: AI (Groq/Gemini structured output)
+ *   - Evidence verification: DETERMINISTIC (snippet substring check)
  *   - Paper comparison: DETERMINISTIC (compare_papers function)
  *   - Readiness check: DETERMINISTIC (research_readiness function)
  *   - Output filtering: DETERMINISTIC (remove unauthorized source_ids)
@@ -37,115 +38,141 @@ import type {
 } from "./schema";
 import { generateEvidence } from "../ai/providers";
 import { compare_papers, research_readiness } from "./tools";
+import { agentRag, type CorpusPaper, type RetrievedChunk } from "./agent-rag";
 
-// ─── Corpus Manifest ─────────────────────────────────────────────────────────
-
-/**
- * Approved paper IDs from the source register.
- *
- * TODO(AlBaraa + Mariam Eladawy): Replace this placeholder with real paper
- * IDs once the corpus is finalized. This should eventually be loaded from
- * `data/corpus/manifest.json` at startup.
- *
- * WHY AN ALLOWLIST:
- *   The product must ONLY answer from approved papers. An allowlist ensures
- *   that even if the AI hallucinates a paper ID, it gets filtered out
- *   before reaching the client. This is a deterministic safety boundary.
- */
-const APPROVED_PAPER_IDS = new Set<string>([
-  "paper-001",
-  "paper-002",
-  "paper-003",
-  "paper-004",
-  "paper-005",
-  "paper-006",
-  "paper-007",
-  "paper-008",
-  "paper-009",
-  "paper-010",
-  "paper-011",
-  "paper-012",
-  "paper-013",
-  "paper-014",
-  "paper-015",
-]);
+// ─── Corpus Validation ───────────────────────────────────────────────────────
 
 /**
- * Validate that all paper IDs are in the approved corpus.
+ * Validate paper IDs against the approved corpus manifest.
+ *
+ * Uses the real corpus manifest as the single source of truth.
+ * Falls back to a development allowlist ONLY when the manifest is empty
+ * (pre-corpus setup period), so clients get a clear error rather than
+ * fabricated evidence.
  *
  * @param paperIds - Paper IDs from the request.
  * @returns Array of unknown paper IDs (empty if all are valid).
  */
+const DEVELOPMENT_PAPER_IDS = new Set<string>([
+  "paper-001", "paper-002", "paper-003", "paper-004", "paper-005",
+  "paper-006", "paper-007", "paper-008", "paper-009", "paper-010",
+  "paper-011", "paper-012", "paper-013", "paper-014", "paper-015",
+]);
+
 export function getUnknownPaperIds(paperIds: string[]): string[] {
-  return paperIds.filter((id) => !APPROVED_PAPER_IDS.has(id));
+  return paperIds.filter((id) => !DEVELOPMENT_PAPER_IDS.has(id));
+}
+
+export async function getUnknownPaperIdsForCorpus(paperIds: string[]): Promise<string[]> {
+  const approvedIds = await agentRag.getApprovedPaperIds();
+  if (approvedIds.length === 0) return getUnknownPaperIds(paperIds);
+  const approved = new Set(approvedIds);
+  return paperIds.filter((id) => !approved.has(id));
 }
 
 // ─── Context Retrieval ───────────────────────────────────────────────────────
 
 /**
- * Retrieve relevant context chunks from the approved corpus.
+ * Retrieve relevant context chunks from the approved corpus via AgentRAG.
  *
- * CURRENT IMPLEMENTATION:
- *   Returns a placeholder context string. When the Gemini File Search store
- *   is configured (GEMINI_FILE_SEARCH_STORE_ID env var), the provider layer
- *   handles retrieval automatically via the file_search tool.
- *
- * FUTURE IMPLEMENTATION:
- *   Could query the Gemini File Search API directly here for more control
- *   over chunk selection and metadata extraction.
+ * The retrieval layer uses TF-IDF scoring over original text from the
+ * approved manifest. The result is provider-neutral: Groq and Gemini
+ * receive precisely the same source-labelled context.
  *
  * @param question  - The user's research question.
  * @param paperIds  - Approved paper IDs to search within.
- * @returns Concatenated text chunks from the corpus.
+ * @returns Formatted context, raw chunks, paper metadata.
  */
-async function retrieveContext(
-  _question: string,
-  _paperIds: string[],
-): Promise<string> {
-  /**
-   * If GEMINI_FILE_SEARCH_STORE_ID is set, the Gemini provider handles
-   * retrieval automatically through its file_search tool configuration.
-   * In that case, we pass minimal context here and let Gemini retrieve.
-   */
-  if (process.env.GEMINI_FILE_SEARCH_STORE_ID) {
-    return "Context will be retrieved by Gemini File Search from the approved corpus store.";
-  }
+async function retrieveContext(question: string, paperIds: string[]): Promise<{
+  context: string;
+  chunks: RetrievedChunk[];
+  papers: Map<string, CorpusPaper>;
+}> {
+  const startTime = Date.now();
 
-  /**
-   * BASELINE FALLBACK:
-   * When no File Search store is configured, return a placeholder.
-   * This allows the system to still function (returning not_found or
-   * using whatever context the model can work with).
-   *
-   * TODO(AlBaraa): Implement direct File Search API retrieval here
-   * for when Groq is the primary provider (Groq can't use Gemini's
-   * File Search tool, so we need to retrieve chunks first and pass
-   * them as context).
-   */
-  return "No pre-retrieved context available. The system relies on Gemini File Search for retrieval.";
+  const [retrieval, papers] = await Promise.all([
+    agentRag.retrieve(question, paperIds),
+    agentRag.getPaperMetadata(paperIds),
+  ]);
+
+  const context = retrieval.chunks
+    .map((chunk) => `<source id="${chunk.source_id}" title="${chunk.title}">\n${chunk.text}\n</source>`)
+    .join("\n\n");
+
+  const elapsed = Date.now() - startTime;
+  console.log(
+    `[ScholarLens] Context retrieval: ${retrieval.chunks.length} chunks from ${papers.size} papers in ${elapsed}ms`,
+  );
+
+  return { chunks: retrieval.chunks, papers, context };
 }
 
 // ─── Evidence Filtering ──────────────────────────────────────────────────────
 
 /**
  * DETERMINISTIC post-processing: filter AI output to only include
- * evidence from approved papers.
+ * evidence from approved papers with verified snippets.
  *
- * WHY THIS EXISTS:
- *   AI models may hallucinate source_ids that don't exist in the corpus.
- *   This filter is a hard boundary — if the AI claims evidence from a
- *   paper not in paper_ids, that evidence is silently removed.
+ * THREE VERIFICATION CHECKS (all must pass):
+ *   1. source_id must be in the user's selected paper list
+ *   2. title must exactly match the manifest title for that paper
+ *   3. evidence_snippet must be a literal substring of retrieved text
+ *
+ * Any item failing any check is silently discarded. This is the
+ * trust-critical step that prevents hallucinated evidence.
  *
  * @param evidence  - Evidence items from the AI provider.
  * @param paperIds  - The approved paper IDs from the request.
- * @returns Filtered evidence with only approved source_ids.
+ * @param chunks    - Original retrieved text chunks.
+ * @param papers    - Paper metadata from the manifest.
+ * @param question  - The validated question (overwrites AI-echoed question).
+ * @returns Filtered evidence with only verified items.
  */
 function filterToApprovedPapers(
   evidence: EvidenceItem[],
   paperIds: string[],
+  chunks: RetrievedChunk[],
+  papers: Map<string, CorpusPaper>,
+  question: string,
 ): EvidenceItem[] {
   const approvedSet = new Set(paperIds);
-  return evidence.filter((item) => approvedSet.has(item.source_id));
+  const normaliseForMatch = (value: string) => value.replace(/\s+/g, " ").trim();
+
+  const filtered = evidence.filter((item) => {
+    // Check 1: source_id must be approved
+    if (!approvedSet.has(item.source_id)) {
+      console.warn(`[ScholarLens] Discarded evidence: unknown source_id "${item.source_id}"`);
+      return false;
+    }
+
+    // Check 2: title must match manifest
+    const manifestTitle = papers.get(item.source_id)?.title;
+    if (manifestTitle !== item.title) {
+      console.warn(
+        `[ScholarLens] Discarded evidence: title mismatch for ${item.source_id}. ` +
+        `Expected "${manifestTitle}", got "${item.title}"`,
+      );
+      return false;
+    }
+
+    // Check 3: snippet must be a literal substring of retrieved text
+    const snippet = normaliseForMatch(item.evidence_snippet);
+    const matchFound = chunks
+      .filter((chunk) => chunk.source_id === item.source_id)
+      .some((chunk) => normaliseForMatch(chunk.text).includes(snippet));
+
+    if (!matchFound) {
+      console.warn(
+        `[ScholarLens] Discarded evidence: snippet not found in retrieved text for ${item.source_id}`,
+      );
+      return false;
+    }
+
+    return true;
+  });
+
+  // Overwrite AI-echoed question with the validated request question
+  return filtered.map((item) => ({ ...item, question }));
 }
 
 // ─── Action Handlers ─────────────────────────────────────────────────────────
@@ -155,9 +182,9 @@ function filterToApprovedPapers(
  *
  * FLOW:
  *   1. Deduplicate paper_ids
- *   2. Retrieve context from corpus
+ *   2. Retrieve context from corpus (TF-IDF ranked)
  *   3. Call provider fallback chain
- *   4. Filter evidence to approved papers only
+ *   4. Filter evidence to approved papers only (3-check verification)
  *   5. Assemble typed response
  *
  * @param request - Zod-validated request.
@@ -166,27 +193,51 @@ function filterToApprovedPapers(
 export async function handleAsk(
   request: ScholarLensRequest,
 ): Promise<ScholarLensResponse> {
+  const startTime = Date.now();
+
   // Deduplicate paper IDs deterministically
   const uniquePaperIds = Array.from(new Set(request.paper_ids));
 
   // Retrieve context from the approved corpus
-  const context = await retrieveContext(request.question, uniquePaperIds);
+  const retrieval = await retrieveContext(request.question, uniquePaperIds);
+
+  if (retrieval.chunks.length === 0) {
+    console.log(
+      `[ScholarLens] ask: not_found (no matching chunks) in ${Date.now() - startTime}ms`,
+    );
+    return {
+      question: request.question,
+      not_found: true,
+      evidence: [],
+      message: "No supporting evidence was found in the selected approved papers.",
+    };
+  }
 
   // Call the AI provider fallback chain
   const result = await generateEvidence(
     request.question,
-    context,
+    retrieval.context,
     uniquePaperIds,
   );
 
   // DETERMINISTIC: Filter out any evidence citing unapproved papers
+  // or with unverified snippets
   const filteredEvidence = filterToApprovedPapers(
     result.evidence,
     uniquePaperIds,
+    retrieval.chunks,
+    retrieval.papers,
+    request.question,
   );
 
   // If the AI said not_found, or all evidence was filtered out → not_found
   const isNotFound = result.not_found || filteredEvidence.length === 0;
+
+  const elapsed = Date.now() - startTime;
+  console.log(
+    `[ScholarLens] ask: ${isNotFound ? "not_found" : `${filteredEvidence.length} evidence items`} ` +
+    `via ${result.provider_used} in ${elapsed}ms`,
+  );
 
   return {
     question: request.question,
@@ -202,12 +253,9 @@ export async function handleAsk(
 /**
  * Handle action="compare": build paper comparison matrix.
  *
- * This is a TWO-STEP process:
+ * TWO-STEP process:
  *   1. AI STEP: Retrieve evidence (same as "ask")
  *   2. DETERMINISTIC STEP: Pass evidence through compare_papers()
- *
- * The comparison matrix itself is ALWAYS deterministic — the same evidence
- * input produces the same matrix output.
  *
  * @param request - Zod-validated request.
  * @returns Comparison matrix response.
@@ -215,11 +263,12 @@ export async function handleAsk(
 export async function handleCompare(
   request: ScholarLensRequest,
 ): Promise<ComparisonResponse> {
-  // Step 1: Get evidence (involves AI)
   const askResult = await handleAsk(request);
-
-  // Step 2: Build matrix DETERMINISTICALLY
   const matrix = compare_papers(askResult.evidence);
+
+  console.log(
+    `[ScholarLens] compare: ${matrix.length} rows, ${new Set(matrix.map((r) => r.source_id)).size} papers`,
+  );
 
   return {
     question: request.question,
@@ -231,7 +280,7 @@ export async function handleCompare(
 /**
  * Handle action="readiness": check research coverage and gaps.
  *
- * Same two-step pattern as "compare":
+ * TWO-STEP process:
  *   1. AI STEP: Retrieve evidence
  *   2. DETERMINISTIC STEP: Run research_readiness()
  *
@@ -241,11 +290,14 @@ export async function handleCompare(
 export async function handleReadiness(
   request: ScholarLensRequest,
 ): Promise<ReadinessResponse> {
-  // Step 1: Get evidence (involves AI)
   const askResult = await handleAsk(request);
+  const readiness = research_readiness(askResult.evidence);
 
-  // Step 2: Assess readiness DETERMINISTICALLY
-  return research_readiness(askResult.evidence);
+  console.log(
+    `[ScholarLens] readiness: ${readiness.papers_used} papers, ready=${readiness.ready}`,
+  );
+
+  return readiness;
 }
 
 // ─── Legacy Baseline (kept for Session 1 compatibility) ──────────────────────
@@ -265,7 +317,6 @@ export function buildBaselineAnswer(
   question: string,
   paperIds: string[],
 ): ScholarLensResponse {
-  // No papers selected → "not found" is a first-class result, never a fake answer.
   if (paperIds.length === 0) {
     return {
       question,

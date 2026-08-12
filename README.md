@@ -58,12 +58,12 @@ npm run build    # production build
 | Area | Owner | Main folders |
 |---|---|---|
 | Architecture, integration, deployment, release | **Mohammed Hassan Mahmoud** (Lead) | `docs/`, `.github/`, env & deploy |
-| Frontend / user workflow | **Mohammed Hassan Mahmoud** | `src/app/scholarlens/`, `src/components/` |
+| Frontend / user workflow | **farkadaa** | `src/app/scholarlens/`, `src/components/` |
 | AI & backend | **AlBaraa** | `src/app/api/`, `src/lib/ai/`, `src/lib/scholarlens/` |
 | Approved knowledge & tools | **Mariam Eladawy** | `knowledge/`, `data/corpus/`, `docs/source-register.md`, `taxonomy.ts`, `tool-rules.ts` |
 
 > Team note: Ahmed Mossad and Mariam Ali withdrew from the training. Their work was
-> redistributed with Dr. Ahmed's approval — see `docs/architecture.md`.
+> redistributed to farkadaa with Dr. Ahmed's approval — see `docs/architecture.md`.
 
 ---
 

@@ -5,9 +5,10 @@
  * │  Owner: AlBaraa (AI & Backend Engineer)                             │
  * └──────────────────────────────────────────────────────────────────────┘
  *
- * POST /api/scholarlens — the single API entry point.
+ * POST /api/scholarlens — the single API entry point for evidence queries.
+ * GET  /api/scholarlens — corpus health check for deployment smoke tests.
  *
- * REQUEST FLOW:
+ * REQUEST FLOW (POST):
  *   ┌────────────┐     ┌───────────┐     ┌──────────────┐     ┌──────────┐
  *   │ Rate Limit │────→│ JSON Parse│────→│ Zod Validate │────→│ Dispatch │
  *   │   Check    │     │ try/catch │     │  safeParse   │     │ by action│
@@ -32,11 +33,12 @@ import {
   handleAsk,
   handleCompare,
   handleReadiness,
-  buildBaselineAnswer,
-  getUnknownPaperIds,
+  getUnknownPaperIdsForCorpus,
 } from "@/lib/scholarlens/service";
 import { ProviderError, isProviderConfigured } from "@/lib/ai/providers";
 import { apiRateLimiter } from "@/lib/ai/rate-limiter";
+import { CorpusUnavailableError, agentRag } from "@/lib/scholarlens/agent-rag";
+import crypto from "node:crypto";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -45,17 +47,10 @@ import { apiRateLimiter } from "@/lib/ai/rate-limiter";
  *
  * Checks common proxy headers in order of reliability.
  * Falls back to "unknown" if no IP can be determined.
- *
- * @param request - The incoming HTTP request.
- * @returns Client IP string for rate limiting.
  */
 function getClientIp(request: Request): string {
-  // Vercel and most reverse proxies set these headers
   const forwarded = request.headers.get("x-forwarded-for");
-  if (forwarded) {
-    // x-forwarded-for may contain multiple IPs; the first is the client
-    return forwarded.split(",")[0].trim();
-  }
+  if (forwarded) return forwarded.split(",")[0].trim();
 
   const realIp = request.headers.get("x-real-ip");
   if (realIp) return realIp.trim();
@@ -64,13 +59,17 @@ function getClientIp(request: Request): string {
 }
 
 /**
+ * Hash a client IP for logging. Never log raw IPs — hash them so
+ * they can be correlated across requests without exposing PII.
+ */
+function hashIp(ip: string): string {
+  return crypto.createHash("sha256").update(ip).digest("hex").slice(0, 8);
+}
+
+/**
  * Redact known secret patterns from error messages before logging.
  *
  * WHY: Even server-side logs should not contain raw API keys.
- * If a log aggregator is compromised, keys would be exposed.
- *
- * @param value - Any value that might contain secrets.
- * @returns Stringified value with secrets redacted.
  */
 function redactSecrets(value: unknown): string {
   const str =
@@ -78,7 +77,6 @@ function redactSecrets(value: unknown): string {
       ? `${value.name}: ${value.message}`
       : String(value);
 
-  // Redact patterns that look like API keys
   return str
     .replace(/sk-[a-zA-Z0-9]{20,}/g, "sk-[REDACTED]")
     .replace(/gsk_[a-zA-Z0-9]{20,}/g, "gsk_[REDACTED]")
@@ -88,16 +86,10 @@ function redactSecrets(value: unknown): string {
 
 /**
  * Build a safe error response that NEVER leaks internal details.
- *
- * @param error   - The caught error (any type).
- * @param context - Human-readable context for the server log.
- * @returns NextResponse with appropriate status code and safe message.
  */
 function safeErrorResponse(error: unknown, context: string): NextResponse {
-  // Log full error server-side (redacted)
   console.error(`[ScholarLens] ${context}:`, redactSecrets(error));
 
-  // Provider errors have a meaningful status code
   if (error instanceof ProviderError) {
     return NextResponse.json(
       {
@@ -108,7 +100,16 @@ function safeErrorResponse(error: unknown, context: string): NextResponse {
     );
   }
 
-  // Everything else is a generic 500
+  if (error instanceof CorpusUnavailableError) {
+    return NextResponse.json(
+      {
+        error: "The approved paper corpus is not ready. Add approved paper metadata and text before asking questions.",
+        code: "CORPUS_UNAVAILABLE",
+      },
+      { status: 503 },
+    );
+  }
+
   return NextResponse.json(
     {
       error: "An internal error occurred. Please try again later.",
@@ -118,7 +119,46 @@ function safeErrorResponse(error: unknown, context: string): NextResponse {
   );
 }
 
-// ─── Route Handler ───────────────────────────────────────────────────────────
+// ─── GET Handler — Corpus Health Check ───────────────────────────────────────
+
+/**
+ * GET /api/scholarlens — returns corpus health status.
+ *
+ * Used by deployment smoke tests and monitoring to verify the corpus
+ * is loaded and providers are configured. Returns NO secrets.
+ */
+export async function GET() {
+  try {
+    const paperIds = await agentRag.getApprovedPaperIds();
+
+    return NextResponse.json({
+      status: "ok",
+      corpus: {
+        paper_count: paperIds.length,
+        paper_ids: paperIds,
+      },
+      providers: {
+        groq: isProviderConfigured("groq"),
+        gemini: isProviderConfigured("gemini"),
+      },
+    });
+  } catch (error) {
+    return NextResponse.json(
+      {
+        status: "error",
+        corpus: { paper_count: 0, paper_ids: [] },
+        providers: {
+          groq: isProviderConfigured("groq"),
+          gemini: isProviderConfigured("gemini"),
+        },
+        error: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 503 },
+    );
+  }
+}
+
+// ─── POST Handler ────────────────────────────────────────────────────────────
 
 /**
  * POST handler for /api/scholarlens.
@@ -129,15 +169,18 @@ function safeErrorResponse(error: unknown, context: string): NextResponse {
  *   - "readiness" → check research readiness
  *
  * Invalid input is rejected at the Zod validation step (400) before
- * any AI provider is called. This is a HARD RULE from the project
- * briefing and scoring rubric.
+ * any AI provider is called.
  */
 export async function POST(request: Request) {
+  const requestStartTime = Date.now();
+
   // ── Step 1: Rate limiting ──────────────────────────────────────────
   const clientIp = getClientIp(request);
+  const ipHash = hashIp(clientIp);
   const rateLimit = apiRateLimiter.check(clientIp);
 
   if (!rateLimit.allowed) {
+    console.warn(`[ScholarLens] Rate limited: client=${ipHash}`);
     return NextResponse.json(
       {
         error: "Too many requests. Please wait before trying again.",
@@ -157,6 +200,7 @@ export async function POST(request: Request) {
   try {
     body = await request.json();
   } catch {
+    console.warn(`[ScholarLens] Invalid JSON from client=${ipHash}`);
     return NextResponse.json(
       {
         error: "Request body must be valid JSON.",
@@ -170,6 +214,10 @@ export async function POST(request: Request) {
   const parseResult = ScholarLensRequestSchema.safeParse(body);
 
   if (!parseResult.success) {
+    console.warn(
+      `[ScholarLens] Validation failed: client=${ipHash}, ` +
+      `errors=${parseResult.error.issues.length}`,
+    );
     return NextResponse.json(
       {
         error: "Request validation failed.",
@@ -182,9 +230,25 @@ export async function POST(request: Request) {
 
   const validatedRequest = parseResult.data;
 
+  // Log validated request metadata (never log raw question for PII safety)
+  console.log(
+    `[ScholarLens] Request: action=${validatedRequest.action}, ` +
+    `papers=${validatedRequest.paper_ids.length}, ` +
+    `qLen=${validatedRequest.question.length}, ` +
+    `client=${ipHash}`,
+  );
+
   // ── Step 4: Validate paper IDs against approved corpus ─────────────
-  const unknownIds = getUnknownPaperIds(validatedRequest.paper_ids);
+  let unknownIds: string[];
+  try {
+    unknownIds = await getUnknownPaperIdsForCorpus(validatedRequest.paper_ids);
+  } catch (error) {
+    return safeErrorResponse(error, "Corpus validation failed");
+  }
   if (unknownIds.length > 0) {
+    console.warn(
+      `[ScholarLens] Unknown paper IDs: ${unknownIds.join(", ")}, client=${ipHash}`,
+    );
     return NextResponse.json(
       {
         error: `Unknown paper_id(s): ${unknownIds.join(", ")}. Only approved papers from the source register are accepted.`,
@@ -194,55 +258,45 @@ export async function POST(request: Request) {
     );
   }
 
-  // ── Step 5: Baseline mode (no providers configured) ────────────────
-  /**
-   * If neither Groq nor Gemini is configured, fall back to the Session 1
-   * baseline. This lets the UI team test the full flow without API keys.
-   *
-   * This is NOT a production path — it's a development convenience.
-   */
-  if (
-    !isProviderConfigured("groq") &&
-    !isProviderConfigured("gemini")
-  ) {
-    console.warn(
-      "[ScholarLens] No AI provider configured. Returning baseline sample data.",
-    );
-    const baseline = buildBaselineAnswer(
-      validatedRequest.question,
-      validatedRequest.paper_ids,
-    );
-    return NextResponse.json(baseline);
-  }
-
-  // ── Step 6: Dispatch by action ─────────────────────────────────────
+  // ── Step 5: Dispatch by action ─────────────────────────────────────
   try {
+    let response: NextResponse;
+
     switch (validatedRequest.action) {
       case "ask": {
         const result = await handleAsk(validatedRequest);
-        return NextResponse.json(result);
+        response = NextResponse.json(result);
+        break;
       }
 
       case "compare": {
         const result = await handleCompare(validatedRequest);
-        return NextResponse.json(result);
+        response = NextResponse.json(result);
+        break;
       }
 
       case "readiness": {
         const result = await handleReadiness(validatedRequest);
-        return NextResponse.json(result);
+        response = NextResponse.json(result);
+        break;
       }
 
       default: {
-        // TypeScript exhaustive check — this should never happen
-        // because Zod already validated the action field.
         const _exhaustive: never = validatedRequest.action;
-        return NextResponse.json(
+        response = NextResponse.json(
           { error: `Unknown action: ${_exhaustive}`, code: "UNKNOWN_ACTION" },
           { status: 400 },
         );
       }
     }
+
+    const elapsed = Date.now() - requestStartTime;
+    console.log(
+      `[ScholarLens] Response: action=${validatedRequest.action}, ` +
+      `status=${response.status}, ${elapsed}ms, client=${ipHash}`,
+    );
+
+    return response;
   } catch (error) {
     return safeErrorResponse(error, "Action dispatch failed");
   }

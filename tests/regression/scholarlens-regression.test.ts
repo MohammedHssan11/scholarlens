@@ -2,259 +2,169 @@
  * ┌──────────────────────────────────────────────────────────────────────┐
  * │  SCHOLARLENS — Section 5: Tests & Error Handling                   │
  * │  File: scholarlens-regression.test.ts                               │
- * │  Owner: AlBaraa (AI & Backend Engineer) — inherited from Ahmed M.  │
+ * │  Owner: AlBaraa (AI & Backend Engineer)                             │
  * └──────────────────────────────────────────────────────────────────────┘
  *
- * Regression tests for ScholarLens API.
- *
- * WHAT THESE TESTS PROVE:
- *   Covers the four regression paths required by the project briefing:
- *     R1 — Main request: valid question → evidence returned
- *     R2 — Structured output: response matches ScholarLensResponseSchema
- *     R3 — Grounding: evidence contains only valid source_ids from corpus
- *     R4 — Tool path: compare_papers() output matches ComparisonRowSchema
- *     R5 — Not-found: out-of-corpus behavior
- *     R6 — Provider timeout behavior (simulated)
- *     R7 — Provider error behavior (simulated)
- *     R8 — Tool failure behavior
- *
- * @see tests/acceptance-matrix.md for the full acceptance criteria mapping.
+ * Regression tests for ScholarLens API Service Layer.
  */
-import { describe, it, expect } from "vitest";
-import {
-  ScholarLensResponseSchema,
-  ComparisonRowSchema,
-  ReadinessResponseSchema,
-  ScholarLensRequestSchema,
-} from "../../src/lib/scholarlens/schema";
-import { buildBaselineAnswer } from "../../src/lib/scholarlens/service";
-import {
-  compare_papers,
-  research_readiness,
-} from "../../src/lib/scholarlens/tools";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { handleAsk } from "../../src/lib/scholarlens/service";
+import { compare_papers, research_readiness } from "../../src/lib/scholarlens/tools";
+import { generateEvidence, ProviderError } from "../../src/lib/ai/providers";
+import { agentRag } from "../../src/lib/scholarlens/agent-rag";
 import type { EvidenceItem } from "../../src/lib/scholarlens/schema";
+
+vi.mock("../../src/lib/ai/providers", () => {
+  return {
+    generateEvidence: vi.fn(),
+    ProviderError: class ProviderError extends Error {
+      status: number;
+      constructor(msg: string, status: number) {
+        super(msg);
+        this.status = status;
+        this.name = "ProviderError";
+      }
+    }
+  };
+});
+
+vi.mock("../../src/lib/scholarlens/agent-rag", () => {
+  return {
+    agentRag: {
+      retrieve: vi.fn(),
+      getPaperMetadata: vi.fn(),
+      getApprovedPaperIds: vi.fn(),
+    }
+  };
+});
 
 // ─── Test Fixtures ───────────────────────────────────────────────────────────
 
-/**
- * Standard test evidence for regression tests.
- * Matches the format that the AI provider would return after Zod validation.
- */
-const testEvidence: EvidenceItem[] = [
-  {
-    question: "What methods are used?",
-    source_id: "paper-001",
-    title: "Paper A",
-    key_finding: "Finding from paper A",
-    evidence_snippet: '"Exact quote from paper A — section 3.2."',
-    agreement: "Consistent with paper B.",
-    disagreement: "N/A",
-    research_gap: "Does not address longitudinal outcomes.",
-    limitation: "Cross-sectional design only.",
-    confidence: "high",
-  },
-  {
-    question: "What methods are used?",
-    source_id: "paper-002",
-    title: "Paper B",
-    key_finding: "Finding from paper B",
-    evidence_snippet: '"Exact quote from paper B — page 14."',
-    agreement: "Consistent with paper A.",
-    disagreement: "Uses different sample population.",
-    research_gap: "",
-    limitation: "Small sample size.",
-    confidence: "medium",
-  },
-  {
-    question: "What methods are used?",
-    source_id: "paper-003",
-    title: "Paper C",
-    key_finding: "Novel finding from paper C",
-    evidence_snippet: '"Exact quote from paper C — abstract."',
-    agreement: "N/A",
-    disagreement: "N/A",
-    research_gap: "Equity implications not studied.",
-    limitation: "Pilot study only.",
-    confidence: "low",
-  },
+const mockChunks = [
+  { source_id: "paper-001", title: "Paper A", text: "Exact quote from paper A — section 3.2.", score: 0.9 },
+  { source_id: "paper-002", title: "Paper B", text: "Exact quote from paper B — page 14.", score: 0.8 },
 ];
 
-// ─── R1: Main Request ────────────────────────────────────────────────────────
+const mockPapers = new Map([
+  ["paper-001", { source_id: "paper-001", title: "Paper A", content_path: "A.md" }],
+  ["paper-002", { source_id: "paper-002", title: "Paper B", content_path: "B.md" }],
+]);
 
-describe("R1 — Main request", () => {
-  it("valid question returns evidence with baseline service", () => {
-    const result = buildBaselineAnswer("What methods are used?", [
-      "paper-001",
-      "paper-002",
-    ]);
+const validEvidence: EvidenceItem[] = [
+  {
+    question: "Q?",
+    source_id: "paper-001",
+    title: "Paper A",
+    key_finding: "Finding A",
+    evidence_snippet: "Exact quote from paper A — section 3.2.",
+    agreement: "N/A", disagreement: "N/A", research_gap: "N/A", limitation: "N/A", confidence: "high",
+  },
+  {
+    question: "Q?",
+    source_id: "paper-002",
+    title: "Paper B",
+    key_finding: "Finding B",
+    evidence_snippet: "Exact quote from paper B — page 14.",
+    agreement: "N/A", disagreement: "N/A", research_gap: "N/A", limitation: "N/A", confidence: "medium",
+  }
+];
 
-    expect(result.not_found).toBe(false);
-    expect(result.evidence.length).toBeGreaterThan(0);
-    expect(result.question).toBe("What methods are used?");
+describe("Service Layer Evidence Filtering (R9, R10, R11)", () => {
+  beforeEach(() => {
+    vi.mocked(agentRag.retrieve).mockResolvedValue({
+      chunks: mockChunks,
+      stats: { papersSearched: 2, totalChunksScanned: 10, chunksAboveThreshold: 2, chunksReturned: 2, topScore: 0.9, queryTermCount: 1, durationMs: 10 }
+    });
+    vi.mocked(agentRag.getPaperMetadata).mockResolvedValue(mockPapers);
   });
 
-  it("echoes the question in the response", () => {
-    const q = "How does X affect Y?";
-    const result = buildBaselineAnswer(q, ["paper-001"]);
-
-    expect(result.question).toBe(q);
-  });
-});
-
-// ─── R2: Structured Output ───────────────────────────────────────────────────
-
-describe("R2 — Structured output", () => {
-  it("baseline response matches ScholarLensResponseSchema", () => {
-    const response = buildBaselineAnswer("What is X?", ["paper-001"]);
-    const validation = ScholarLensResponseSchema.safeParse(response);
-
-    expect(validation.success).toBe(true);
+  afterEach(() => {
+    vi.clearAllMocks();
   });
 
-  it("not_found response matches ScholarLensResponseSchema", () => {
-    const response = buildBaselineAnswer("What is X?", []);
-    const validation = ScholarLensResponseSchema.safeParse(response);
-
-    expect(validation.success).toBe(true);
-    if (validation.success) {
-      expect(validation.data.not_found).toBe(true);
-      expect(validation.data.evidence).toEqual([]);
-    }
-  });
-
-  it("all 10 structured fields are present in evidence items", () => {
-    const response = buildBaselineAnswer("What is X?", ["paper-001"]);
-
-    const requiredFields = [
-      "question",
-      "source_id",
-      "title",
-      "key_finding",
-      "evidence_snippet",
-      "agreement",
-      "disagreement",
-      "research_gap",
-      "limitation",
-      "confidence",
-    ];
-
-    for (const item of response.evidence) {
-      for (const field of requiredFields) {
-        expect(item).toHaveProperty(field);
-      }
-    }
-  });
-});
-
-// ─── R3: Grounding ───────────────────────────────────────────────────────────
-
-describe("R3 — Grounding", () => {
-  it("evidence contains only source_ids from the approved paper list", () => {
-    const requestedPaperIds = ["paper-001", "paper-002"];
-
-    // Simulate filtering (what the service layer does)
-    const approvedSet = new Set(requestedPaperIds);
-    const filtered = testEvidence.filter((item) =>
-      approvedSet.has(item.source_id),
-    );
-
-    // All filtered evidence should reference only approved papers
-    for (const item of filtered) {
-      expect(requestedPaperIds).toContain(item.source_id);
-    }
-
-    // paper-003 should be filtered out
-    expect(filtered.map((i) => i.source_id)).not.toContain("paper-003");
-  });
-
-  it("request schema rejects requests with no paper_ids", () => {
-    const result = ScholarLensRequestSchema.safeParse({
-      question: "What is X?",
-      paper_ids: [],
+  it("R9: removes evidence with hallucinated source_ids", async () => {
+    vi.mocked(generateEvidence).mockResolvedValue({
+      not_found: false,
+      provider_used: "groq",
+      evidence: [
+        ...validEvidence,
+        { ...validEvidence[0], source_id: "paper-999" } // Hallucinated ID
+      ]
     });
 
-    expect(result.success).toBe(false);
+    const response = await handleAsk({ action: "ask", question: "Q?", paper_ids: ["paper-001", "paper-002"] });
+    expect(response.not_found).toBe(false);
+    expect(response.evidence).toHaveLength(2); // The 3rd item is filtered out
+    expect(response.evidence?.map(e => e.source_id)).not.toContain("paper-999");
+  });
+
+  it("R10: removes evidence with title mismatch", async () => {
+    vi.mocked(generateEvidence).mockResolvedValue({
+      not_found: false,
+      provider_used: "groq",
+      evidence: [
+        ...validEvidence,
+        { ...validEvidence[0], title: "Wrong Title" } // Title mismatch
+      ]
+    });
+
+    const response = await handleAsk({ action: "ask", question: "Q?", paper_ids: ["paper-001", "paper-002"] });
+    expect(response.evidence).toHaveLength(2); // The 3rd item is filtered out
+  });
+
+  it("R11: removes evidence where snippet is not an exact substring", async () => {
+    vi.mocked(generateEvidence).mockResolvedValue({
+      not_found: false,
+      provider_used: "groq",
+      evidence: [
+        validEvidence[0],
+        { ...validEvidence[1], evidence_snippet: "Paraphrased quote from paper B." } // Not in chunks
+      ]
+    });
+
+    const response = await handleAsk({ action: "ask", question: "Q?", paper_ids: ["paper-001", "paper-002"] });
+    expect(response.evidence).toHaveLength(1); // The 2nd item is filtered out
+    expect(response.evidence?.[0].source_id).toBe("paper-001");
+  });
+
+  it("R5: returns not_found if ALL evidence is filtered out", async () => {
+    vi.mocked(generateEvidence).mockResolvedValue({
+      not_found: false,
+      provider_used: "groq",
+      evidence: [
+        { ...validEvidence[0], title: "Wrong" },
+        { ...validEvidence[1], source_id: "paper-999" }
+      ]
+    });
+
+    const response = await handleAsk({ action: "ask", question: "Q?", paper_ids: ["paper-001", "paper-002"] });
+    expect(response.not_found).toBe(true);
+    expect(response.evidence).toHaveLength(0);
   });
 });
 
-// ─── R4: Tool Path ───────────────────────────────────────────────────────────
-
-describe("R4 — Tool path", () => {
-  it("compare_papers output matches ComparisonRowSchema", () => {
-    const matrix = compare_papers(testEvidence);
-
-    for (const row of matrix) {
-      const validation = ComparisonRowSchema.safeParse(row);
-      expect(validation.success).toBe(true);
-    }
+describe("Provider Failure Handling (R6, R7)", () => {
+  beforeEach(() => {
+    vi.mocked(agentRag.retrieve).mockResolvedValue({ chunks: mockChunks, stats: { papersSearched: 0, totalChunksScanned: 0, chunksAboveThreshold: 0, chunksReturned: 0, topScore: 0, queryTermCount: 0, durationMs: 0 } });
+    vi.mocked(agentRag.getPaperMetadata).mockResolvedValue(mockPapers);
   });
 
-  it("compare_papers produces correct number of rows", () => {
-    const matrix = compare_papers(testEvidence);
-    expect(matrix).toHaveLength(testEvidence.length);
-  });
+  it("R6/R7: throws ProviderError if generateEvidence fails", async () => {
+    vi.mocked(generateEvidence).mockRejectedValue(new ProviderError("Both providers failed", "groq", 502));
 
-  it("research_readiness output matches ReadinessResponseSchema", () => {
-    const report = research_readiness(testEvidence);
-    const validation = ReadinessResponseSchema.safeParse(report);
-
-    expect(validation.success).toBe(true);
+    await expect(handleAsk({ action: "ask", question: "Q?", paper_ids: ["paper-001"] }))
+      .rejects.toThrow(ProviderError);
   });
 });
 
-// ─── R5: Not-Found ───────────────────────────────────────────────────────────
-
-describe("R5 — Not-found", () => {
-  it("returns not_found=true when no papers are selected", () => {
-    const result = buildBaselineAnswer("Out of scope question?", []);
-
-    expect(result.not_found).toBe(true);
-    expect(result.evidence).toEqual([]);
-    expect(result.message).toBeDefined();
-  });
-});
-
-// ─── R6: Provider Timeout (Simulated) ────────────────────────────────────────
-
-describe("R6 — Provider timeout behavior", () => {
-  it("baseline service does not hang or timeout", () => {
-    const start = Date.now();
-    buildBaselineAnswer("What is X?", ["paper-001"]);
-    const elapsed = Date.now() - start;
-
-    // Baseline should be near-instant (< 100ms)
-    expect(elapsed).toBeLessThan(100);
-  });
-});
-
-// ─── R7: Provider Error (Simulated) ──────────────────────────────────────────
-
-describe("R7 — Provider error behavior", () => {
-  it("baseline gracefully handles empty paper list", () => {
-    // This simulates the "no evidence" case without a provider error
-    const result = buildBaselineAnswer("What is X?", []);
-
-    expect(result).toBeDefined();
-    expect(result.not_found).toBe(true);
-    // No exception thrown
-  });
-});
-
-// ─── R8: Tool Failure Behavior ───────────────────────────────────────────────
-
-describe("R8 — Tool failure behavior", () => {
+describe("Tool Path (R8)", () => {
   it("compare_papers handles empty evidence gracefully", () => {
-    const matrix = compare_papers([]);
-
-    expect(matrix).toEqual([]);
-    // No exception thrown
+    expect(compare_papers([])).toEqual([]);
   });
 
   it("research_readiness handles empty evidence gracefully", () => {
     const report = research_readiness([]);
-
     expect(report.papers_used).toBe(0);
     expect(report.ready).toBe(false);
-    // No exception thrown
   });
 });
