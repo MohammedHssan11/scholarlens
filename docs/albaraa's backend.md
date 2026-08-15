@@ -1,5 +1,14 @@
 # albaraa's backend
 
+## Decision needed: retrieval strategy
+
+The current backend uses a local TF-IDF retriever instead of the originally agreed
+Gemini File Search. This keeps Groq and Gemini grounded on the same approved source
+chunks, because Groq cannot query Gemini's managed File Search, but lexical retrieval
+can miss semantically related wording. **Mohammed Hassan Mahmoud (Integration Lead):
+please confirm whether this provider-independent retrieval tradeoff is approved before
+the backend is merged.**
+
 ## Purpose
 
 ScholarLens is a research-evidence backend. It does not answer from general AI knowledge. It finds evidence in papers approved by the team, lets the AI explain that evidence in a fixed structure, and proves every displayed quote is actually present in retrieved paper text.
@@ -41,7 +50,19 @@ The corpus lives under `data/corpus`. `data/corpus/manifest.json` is the machine
 
 The referenced file must contain text extracted from the approved, legally usable paper. It is intentionally separate from a PDF: a private or unlicensed PDF must not be committed to this public repository. The team must also enter the same paper’s complete publication, licence, and approval details in `docs/source-register.md`.
 
-The committed manifest is empty because the project currently has no approved papers or source text. This is deliberate. Adding invented paper metadata or demonstration quotes would violate ScholarLens’ grounding rule. Until the corpus is supplied, the API tells users that the corpus is not ready instead of creating fake evidence.
+The committed manifest contains only active papers with confirmed arXiv identifiers.
+Run the reproducible setup step from the repository root before starting the app:
+
+```bash
+npm run fetch-corpus
+```
+
+Python 3 is required. The downloader uses `data/corpus` relative to the repository by
+default; set `SCHOLARLENS_CORPUS_DIR` to download into another directory. Paper files
+remain gitignored and must not be committed. Papers 005, 006, and 007 are excluded
+because their official publication URL/DOI and licence are still unconfirmed and the
+old downloader generated fabricated placeholder text for them. Paper 010 is also
+excluded because its official publication URL/DOI and licence remain unconfirmed.
 
 ## AgentRAG retrieval
 
@@ -87,11 +108,11 @@ Any item that fails one of these checks is discarded. If all items are discarded
 
 `compare` first performs the same verified `ask` work, then `compare_papers()` creates a deterministic row for each evidence item. The comparison operation itself does not ask a model to invent a table.
 
-`readiness` also starts with verified evidence. `research_readiness()` then deterministically counts distinct papers, checks that snippets meet the minimum length, collects non-empty gaps, and marks the set ready only when it meets `READINESS_RULES`. Current rules require two distinct papers and snippets of at least twenty characters.
+`readiness` also starts with verified evidence. `research_readiness()` then deterministically counts distinct papers, checks that snippets meet the minimum length, collects non-empty gaps, and marks the set ready only when it meets `READINESS_RULES`. Current rules require three distinct papers and snippets of at least thirty characters.
 
 **Logging:** The backend logs detailed, structured requests and retrieval stats. To prevent PII leaks, user IPs are hashed and question content is never logged in full.
 
-**Health Check:** `GET /api/scholarlens` provides a safe deployment smoke test, returning corpus health (paper count) and provider configuration status without leaking secrets.
+**Health Check:** `GET /api/scholarlens` provides a safe deployment smoke test, returning corpus health and provider configuration status without leaking secrets. It counts only manifest entries whose referenced file exists and is non-empty, and returns `503` with the unavailable paper IDs when the local corpus is incomplete.
 
 ## Main files
 

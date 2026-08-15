@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "fetch-corpus": "python download_papers.py",
     "test": "vitest run",
     "test:watch": "vitest"
   },

@@ -129,19 +129,21 @@ function safeErrorResponse(error: unknown, context: string): NextResponse {
  */
 export async function GET() {
   try {
-    const paperIds = await agentRag.getApprovedPaperIds();
+    const { availablePaperIds, unavailablePaperIds } = await agentRag.getCorpusHealth();
+    const corpusReady = unavailablePaperIds.length === 0 && availablePaperIds.length > 0;
 
     return NextResponse.json({
-      status: "ok",
+      status: corpusReady ? "ok" : "error",
       corpus: {
-        paper_count: paperIds.length,
-        paper_ids: paperIds,
+        paper_count: availablePaperIds.length,
+        paper_ids: availablePaperIds,
+        unavailable_paper_ids: unavailablePaperIds,
       },
       providers: {
         groq: isProviderConfigured("groq"),
         gemini: isProviderConfigured("gemini"),
       },
-    });
+    }, { status: corpusReady ? 200 : 503 });
   } catch (error) {
     return NextResponse.json(
       {

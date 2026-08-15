@@ -1,4 +1,4 @@
-import { readFile } from "node:fs/promises";
+import { readFile, stat } from "node:fs/promises";
 import path from "node:path";
 import { z } from "zod";
 
@@ -242,6 +242,39 @@ export class AgentRAG {
    */
   async getApprovedPaperIds(): Promise<string[]> {
     return (await loadManifest()).map((paper) => paper.source_id);
+  }
+
+  /**
+   * Report which manifest entries currently have a non-empty corpus file.
+   */
+  async getCorpusHealth(): Promise<{
+    availablePaperIds: string[];
+    unavailablePaperIds: string[];
+  }> {
+    const papers = await loadManifest();
+    const availablePaperIds: string[] = [];
+    const unavailablePaperIds: string[] = [];
+
+    for (const paper of papers) {
+      const documentPath = path.resolve(corpusDirectory, paper.content_path);
+      if (!isWithinCorpus(documentPath)) {
+        unavailablePaperIds.push(paper.source_id);
+        continue;
+      }
+
+      try {
+        const file = await stat(documentPath);
+        if (file.isFile() && file.size > 0) {
+          availablePaperIds.push(paper.source_id);
+        } else {
+          unavailablePaperIds.push(paper.source_id);
+        }
+      } catch {
+        unavailablePaperIds.push(paper.source_id);
+      }
+    }
+
+    return { availablePaperIds, unavailablePaperIds };
   }
 
   /**

@@ -1,45 +1,91 @@
-import urllib.request
-import os
+"""Download the approved ScholarLens corpus without committing paper files."""
+
+from __future__ import annotations
+
 import json
+import os
+from pathlib import Path
+import shutil
+import sys
+import urllib.request
 
-corpus_dir = r"c:\Users\albar\Downloads\scholarlens\data\corpus"
 
-papers = [
-    {"id": "paper-001", "arxiv_id": "2501.09136", "title": "Agentic Retrieval-Augmented Generation: A Survey on Agentic RAG"},
-    {"id": "paper-002", "arxiv_id": "2506.10408", "title": "Reasoning RAG via System 1 or System 2"},
-    {"id": "paper-003", "arxiv_id": "2506.00054", "title": "Retrieval-Augmented Generation: A Comprehensive Survey of Architectures"},
-    {"id": "paper-004", "arxiv_id": "2507.18910", "title": "A Systematic Review of Key Retrieval-Augmented Generation (RAG) Systems"},
-    {"id": "paper-005", "is_md": True, "title": "Agentic Retrieval-Augmented Generation: Advancing AI-Driven Information Retrieval"},
-    {"id": "paper-006", "is_md": True, "title": "MMA-RAG: A Survey on Multimodal Agentic Retrieval-Augmented Generation"},
-    {"id": "paper-007", "is_md": True, "title": "Graph-Based Agentic Retrieval-Augmented Generation: A Comprehensive Survey"},
-    {"id": "paper-008", "arxiv_id": "2502.08826", "title": "Ask in Any Modality: A Comprehensive Survey on Multimodal Retrieval-Augmented Generation"},
-    {"id": "paper-009", "arxiv_id": "2005.11401", "title": "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks"},
-    {"id": "paper-010", "arxiv_id": "2404.16130", "title": "From Local to Global: A GraphRAG Approach to Query-Focused Summarization"}
-]
+REPO_ROOT = Path(__file__).resolve().parent
+SOURCE_MANIFEST = REPO_ROOT / "data" / "corpus" / "manifest.json"
+DEFAULT_CORPUS_DIR = SOURCE_MANIFEST.parent
+DOWNLOAD_URLS = {
+    "paper-001": "https://arxiv.org/pdf/2501.09136.pdf",
+    "paper-002": "https://arxiv.org/pdf/2506.10408.pdf",
+    "paper-003": "https://arxiv.org/pdf/2506.00054.pdf",
+    "paper-004": "https://arxiv.org/pdf/2507.18910.pdf",
+    "paper-008": "https://arxiv.org/pdf/2502.08826.pdf",
+    "paper-009": "https://arxiv.org/pdf/2005.11401.pdf",
+}
 
-manifest = {"version": 1, "papers": []}
 
-for p in papers:
-    print(f"Processing {p['id']} - {p['title']}...")
-    if p.get("is_md"):
-        filepath = os.path.join(corpus_dir, f"{p['id']}.md")
-        with open(filepath, "w", encoding="utf-8") as f:
-            f.write(f"# {p['title']}\n\nAbstract and details available via external databases. This paper focuses on the specific aspects of Agentic RAG as described in the title.")
-        manifest["papers"].append({"id": p['id'], "file": f"{p['id']}.md", "title": p['title']})
-    else:
-        url = f"https://arxiv.org/pdf/{p['arxiv_id']}.pdf"
-        filepath = os.path.join(corpus_dir, f"{p['id']}.pdf")
-        try:
-            # We'll use a user-agent to avoid getting blocked by arxiv
-            req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
-            with urllib.request.urlopen(req) as response, open(filepath, 'wb') as out_file:
-                out_file.write(response.read())
-            manifest["papers"].append({"id": p['id'], "file": f"{p['id']}.pdf", "title": p['title']})
-        except Exception as e:
-            print(f"Failed to download {url}: {e}")
+def corpus_directory() -> Path:
+    configured = os.environ.get("SCHOLARLENS_CORPUS_DIR")
+    return Path(configured).expanduser().resolve() if configured else DEFAULT_CORPUS_DIR
 
-manifest_path = os.path.join(corpus_dir, "manifest.json")
-with open(manifest_path, "w", encoding="utf-8") as f:
-    json.dump(manifest, f, indent=2)
 
-print("Corpus population complete.")
+def load_manifest() -> dict[str, object]:
+    with SOURCE_MANIFEST.open(encoding="utf-8") as manifest_file:
+        manifest = json.load(manifest_file)
+
+    source_ids = {paper["source_id"] for paper in manifest["papers"]}
+    missing_urls = source_ids - DOWNLOAD_URLS.keys()
+    stale_urls = DOWNLOAD_URLS.keys() - source_ids
+    if missing_urls or stale_urls:
+        raise ValueError(
+            "The manifest and confirmed download URL list differ: "
+            f"missing URLs={sorted(missing_urls)}, stale URLs={sorted(stale_urls)}"
+        )
+    return manifest
+
+
+def destination_path(corpus_dir: Path, content_path: str) -> Path:
+    destination = (corpus_dir / content_path).resolve()
+    if corpus_dir != destination and corpus_dir not in destination.parents:
+        raise ValueError(f"Unsafe corpus content path: {content_path}")
+    return destination
+
+
+def download(url: str, destination: Path) -> None:
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    temporary = destination.with_suffix(destination.suffix + ".part")
+    request = urllib.request.Request(
+        url,
+        headers={"User-Agent": "ScholarLens corpus setup/1.0"},
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=60) as response, temporary.open("wb") as output:
+            shutil.copyfileobj(response, output)
+        temporary.replace(destination)
+    finally:
+        temporary.unlink(missing_ok=True)
+
+
+def main() -> int:
+    corpus_dir = corpus_directory()
+    corpus_dir.mkdir(parents=True, exist_ok=True)
+
+    try:
+        manifest = load_manifest()
+        for paper in manifest["papers"]:
+            source_id = paper["source_id"]
+            destination = destination_path(corpus_dir, paper["content_path"])
+            print(f"Downloading {source_id} to {destination}...")
+            download(DOWNLOAD_URLS[source_id], destination)
+
+        if corpus_dir != DEFAULT_CORPUS_DIR:
+            shutil.copyfile(SOURCE_MANIFEST, corpus_dir / "manifest.json")
+    except (OSError, ValueError, KeyError, TypeError, json.JSONDecodeError) as error:
+        print(f"Corpus setup failed: {error}", file=sys.stderr)
+        return 1
+
+    print(f"Downloaded {len(manifest['papers'])} approved papers to {corpus_dir}.")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
