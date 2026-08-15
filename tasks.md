@@ -88,7 +88,7 @@ fixed). Everything below is still open, verified live as of 2026-08-14.
   counting it as available, so a missing-corpus environment reports its real
   state instead of a false positive.
 
-- [ ] **1.5 — Get sign-off on the custom retrieval approach, don't just note it.**
+- [x] **1.5 — Get sign-off on the custom retrieval approach, don't just note it.**
   `src/lib/scholarlens/agent-rag.ts` replaces the originally-agreed Gemini File
   Search with a custom local TF-IDF retriever. The reasoning is already written
   in `docs/albaraa's backend.md` and is solid (Groq can't use Gemini's managed
@@ -648,3 +648,100 @@ environment — safe no-provider error path verified instead.”
 Still open: item 1.5 needs Mohammed Hassan Mahmoud's explicit confirmation of the local
 TF-IDF retrieval strategy. Per the no-merge rule, PR #8 has not been merged and Phase 2
 has not started.
+
+### 2026-08-15 — Fabricated production-readiness claims removed
+
+Mohammed Hassan Mahmoud explicitly approved the item 1.5 local TF-IDF retrieval
+strategy. No further retrieval-strategy action is required.
+
+The Lead identified that PR #8 changed Lead-owned `docs/production-readiness.md` to
+claim two Vercel URLs and a production observation of “1200ms p95 latency, 0% error
+rate.” No deployment or observation evidence exists. The file was restored exactly from
+`dev` and committed alone as `de34380` (`fix: remove out-of-scope, fabricated
+production-readiness claims`). `git diff origin/dev...HEAD --
+docs/production-readiness.md` then returned no output.
+
+Why this reached the PR: commit `5f491e2` predated this session, but I reviewed the
+branch as though previously committed backend-branch content was implicitly in scope. My
+pre-push audit listed `docs/production-readiness.md` in the PR diff, yet I checked only
+file scope at a coarse level, generated artifacts, and secrets; I did not open and verify
+every changed documentation claim against real evidence. Publishing the full branch made
+that omission mine regardless of when the bad lines were introduced.
+
+What should have caught it: before any push, build an explicit allowlist from
+`tasks.md`, compare it to every path in `git diff origin/dev...HEAD`, stop on every
+non-allowlisted path, and manually read the complete diff of every documentation file.
+Operational claims must additionally have direct evidence (real deployment URL, command
+output, or observation record); absent evidence means restore `dev` and escalate, not
+publish.
+
+All four checks were rerun from the beginning after the corrective commit.
+
+`npm run lint` (exit 0):
+
+```text
+> scholarlens-app@0.1.0 lint
+> eslint
+```
+
+`npx tsc --noEmit` (exit 0):
+
+```text
+```
+
+`npm run build` (exit 0):
+
+```text
+> scholarlens-app@0.1.0 build
+> next build
+
+⚠ Warning: Next.js inferred your workspace root, but it may not be correct.
+ We detected multiple lockfiles and selected the directory of C:\Users\mh978\package-lock.json as the root directory.
+ To silence this warning, set `turbopack.root` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
+   See https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopack#root-directory for more information.
+ Detected additional lockfiles:
+   * C:\Users\mh978\Downloads\scholarlens-app\package-lock.json
+
+▲ Next.js 16.2.11 (Turbopack)
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 2.8s
+  Running TypeScript ...
+  Finished TypeScript in 2.7s ...
+  Collecting page data using 7 workers ...
+  Generating static pages using 7 workers (0/6) ...
+  Generating static pages using 7 workers (1/6)
+  Generating static pages using 7 workers (2/6)
+  Generating static pages using 7 workers (4/6)
+✓ Generating static pages using 7 workers (6/6) in 757ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ƒ /api/scholarlens
+└ ○ /scholarlens
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+```
+
+`npx vitest run` (exit 0):
+
+```text
+ RUN  v4.1.10 C:/Users/mh978/Downloads/scholarlens-app
+
+ Test Files  8 passed (8)
+      Tests  82 passed (82)
+   Start at  18:46:56
+   Duration  1.27s (transform 667ms, setup 0ms, import 2.73s, tests 549ms, environment 1ms)
+```
+
+Remote checks on corrective commit `de34380`:
+
+```text
+GitGuardian Security Checks  pass  12s
+Lint, type-check, build      pass  35s
+```
+
+PR #8 remains open and unmerged. Phase 2 has not started.
