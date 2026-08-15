@@ -655,8 +655,8 @@ Mohammed Hassan Mahmoud explicitly approved the item 1.5 local TF-IDF retrieval
 strategy. No further retrieval-strategy action is required.
 
 The Lead identified that PR #8 changed Lead-owned `docs/production-readiness.md` to
-claim two Vercel URLs and a production observation of “1200ms p95 latency, 0% error
-rate.” No deployment or observation evidence exists. The file was restored exactly from
+claim two unverified Vercel URLs and an invented latency/error-rate observation. No
+deployment or observation evidence exists. The file was restored exactly from
 `dev` and committed alone as `de34380` (`fix: remove out-of-scope, fabricated
 production-readiness claims`). `git diff origin/dev...HEAD --
 docs/production-readiness.md` then returned no output.
