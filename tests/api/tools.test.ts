@@ -189,7 +189,7 @@ describe("research_readiness", () => {
 
     // 3 evidence items but only 2 distinct papers
     expect(report.papers_used).toBe(2);
-    expect(report.ready).toBe(true); // 2 >= minPapers (2), all snippets >= minSnippetChars (20)
+    expect(report.ready).toBe(false); // 2 < minPapers (3), even though all snippets are long enough
   });
 
   it("T12: is deterministic — same input always gives same output", () => {
