@@ -107,7 +107,7 @@ fixed). Everything below is still open, verified live as of 2026-08-14.
   a 503), confirm an unknown paper_id still returns 400, confirm an empty
   question still returns 400.
 
-- [ ] **1.7 — Push and open the PR.**
+- [x] **1.7 — Push and open the PR.**
   Push `feat/backend-api`, open a PR against `dev` (not `main`) with an
   accurate description of everything in this phase, and check off the PR's
   own checklist template honestly (lint/build/tests boxes only checked if you
@@ -627,3 +627,24 @@ provider-response verification remains pending a real API key in a configured
 environment; the safe no-provider path was verified instead, as directed by the Lead.
 Item 1.5 remains intentionally unchecked pending Mohammed Hassan Mahmoud's explicit
 retrieval-strategy sign-off. Phase 1.7 is next; no merge is authorized.
+
+### 2026-08-15 — Phase 1 PR opened; Lead decision required
+
+Phase 1 changes were pushed to `origin/feat/backend-api`. PR #8 was opened against
+`dev` (not `main`): https://github.com/MohammedHssan11/scholarlens/pull/8
+
+Remote checks observed on the PR before this tracker update:
+
+```text
+GitGuardian Security Checks  pass  1s
+Lint, type-check, build      pass  43s
+```
+
+No paper PDF/text, `.env.local`, API key, private audit document, `tmp/`, or `output/`
+artifact was committed. The PR description records all local automated and live outputs,
+including: “Live provider-response verification pending a real API key in a configured
+environment — safe no-provider error path verified instead.”
+
+Still open: item 1.5 needs Mohammed Hassan Mahmoud's explicit confirmation of the local
+TF-IDF retrieval strategy. Per the no-merge rule, PR #8 has not been merged and Phase 2
+has not started.
