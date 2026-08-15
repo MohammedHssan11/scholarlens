@@ -29,7 +29,7 @@ sent to the browser or included in the client bundle.
 
 | Layer | Files | Owner |
 |---|---|---|
-| UI / workflow | `src/app/scholarlens/`, `src/components/` | Mohammed |
+| UI / workflow | `src/app/scholarlens/`, `src/components/` | GitHub: Doodiiii (identity to be confirmed — see Team changes) |
 | API + validation | `src/app/api/scholarlens/route.ts`, `src/lib/scholarlens/schema.ts` | AlBaraa |
 | AI providers | `src/lib/ai/providers.ts` | AlBaraa |
 | Grounding / retrieval | `src/lib/scholarlens/service.ts` | AlBaraa |
@@ -42,13 +42,25 @@ sent to the browser or included in the client bundle.
 
 - **Ahmed Mossad Elgammal** (Evaluation & Production) withdrew. Work redistributed with
   Dr. Ahmed's approval.
-- **Mariam Ali Ahmed** (Product UI & Workflow) withdrew. The frontend and user-workflow
-  ownership moved to the Integration Lead.
+- **Mariam Ali Ahmed** (Product UI & Workflow) was recorded as withdrawn as of 2026-07-23.
+  This is now unclear: `feat/frontend-ui` has active, ongoing commits and an open PR,
+  all authored by GitHub account **Doodiiii** (`alidreasydody@gmail.com`) — an email that
+  doesn't match Mariam Ali's contact email on file. **Open action for the Lead:** confirm
+  whether Doodiiii is Mariam Ali, a new member, or someone else, and update this doc once
+  known.
 
 ## Open decision
 
 > **Where are papers and chunks stored?** Gemini File Search store only, or also a
 > database for metadata? — to be decided by the Lead with AlBaraa.
+
+**Proposed answer (not yet confirmed):** Gemini File Search store only for the prototype/beta.
+The approved corpus is small (10 papers) and fully described in `docs/source-register.md`,
+so a separate metadata database would add operational cost (another service to secure,
+deploy, and back up) without a clear benefit at this scale. Revisit if the corpus grows
+past what one narrow topic needs, or if the team needs to query metadata outside of what
+File Search's retrieval already returns. **This is a suggestion, not a decision — needs
+sign-off from the Lead and AlBaraa before it's final.**
 
 ## External services (approved)
 

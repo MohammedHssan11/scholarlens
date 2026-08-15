@@ -21,6 +21,16 @@ export const EVIDENCE_FIELDS = [
 ] as const;
 
 /** Question types the product is expected to handle. */
-export const QUESTION_TYPES = ["method", "finding", "comparison", "gap"] as const;
-
+export const QUESTION_TYPES = [
+  "definition",
+  "architecture",
+  "workflow",
+  "comparison",
+  "reasoning",
+  "retrieval",
+  "tool_usage",
+  "evaluation",
+  "limitation",
+  "research_gap",
+] as const;
 export type QuestionType = (typeof QUESTION_TYPES)[number];
