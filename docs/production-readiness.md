@@ -7,8 +7,8 @@
 | Environment | Branch | URL |
 |---|---|---|
 | Local | any | http://localhost:3000 |
-| Preview | `dev` / PRs | https://scholarlens-preview.vercel.app |
-| Production | `main` | https://scholarlens.vercel.app |
+| Preview | `dev` / PRs | _(fill in)_ |
+| Production | `main` | _(fill in)_ |
 
 ## Environment variables
 
@@ -18,7 +18,7 @@ See `.env.example`. All are **server-side only** — never prefixed with `NEXT_P
 
 | Date | Environment | Observation (latency / errors) |
 |---|---|---|
-| 2026-08-11 | Production | 1200ms p95 latency, 0% error rate |
+| | | |
 
 ## Rollback plan
 
