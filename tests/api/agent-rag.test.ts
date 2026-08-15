@@ -11,7 +11,7 @@
  */
 import { describe, it, expect } from "vitest";
 import path from "node:path";
-import { _testing } from "../../src/lib/scholarlens/agent-rag";
+import { _testing, agentRag } from "../../src/lib/scholarlens/agent-rag";
 
 const {
   normalise,
@@ -115,4 +115,18 @@ describe("AgentRAG TF-IDF Scoring", () => {
     const score = computeTfIdfScore(["other", "words"], ["test"], idfMap);
     expect(score).toBe(0);
   });
+});
+
+describe("AgentRAG PDF Integration", () => {
+  it("extracts non-empty retrieval chunks from a real corpus PDF", async () => {
+    const result = await agentRag.retrieve(
+      "What is agentic retrieval-augmented generation?",
+      ["paper-001"],
+    );
+
+    expect(result.stats.papersSearched).toBe(1);
+    expect(result.stats.totalChunksScanned).toBeGreaterThan(0);
+    expect(result.chunks.length).toBeGreaterThan(0);
+    expect(result.chunks.every((chunk) => chunk.text.trim().length > 0)).toBe(true);
+  }, 15_000);
 });

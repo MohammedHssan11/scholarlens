@@ -1,5 +1,6 @@
 import { readFile, stat } from "node:fs/promises";
 import path from "node:path";
+import { PDFParse } from "pdf-parse";
 import { z } from "zod";
 
 // ─── Corpus Manifest Schema ─────────────────────────────────────────────────
@@ -323,10 +324,13 @@ export class AgentRAG {
       try {
         if (paper.content_path.toLowerCase().endsWith(".pdf")) {
           const buffer = await readFile(documentPath);
-          // eslint-disable-next-line @typescript-eslint/no-require-imports
-          const pdfParse = require("pdf-parse");
-          const pdfData = await pdfParse(buffer);
-          text = pdfData.text;
+          const parser = new PDFParse({ data: buffer });
+          try {
+            const pdfData = await parser.getText();
+            text = pdfData.text;
+          } finally {
+            await parser.destroy();
+          }
         } else {
           text = await readFile(documentPath, "utf8");
         }
