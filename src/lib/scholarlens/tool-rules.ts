@@ -6,9 +6,8 @@
  * and when a set of evidence is "research ready". They are rules, not opinions -
  * so they can be unit tested.
  *
- * For example, READINESS_RULES guarantees that we never show an answer
- * based on just 1 paper (minPapers: 2), and that snippets are real sentences
- * (minSnippetChars: 20), preventing single-word hallucinations.
+ * TODO(Mariam Eladawy): agree these thresholds with the Lead and document
+ * one worked example for each rule.
  */
 
 export const READINESS_RULES = {
