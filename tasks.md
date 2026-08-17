@@ -117,13 +117,13 @@ fixed). Everything below is still open, verified live as of 2026-08-14.
 
 ## Phase 2 — Integrate all team branches (this is the Lead's job — do it carefully)
 
-- [ ] **2.1 — Open the backend PR against `dev`, once Phase 1 is fully green**
+- [x] **2.1 — Open the backend PR against `dev`, once Phase 1 is fully green**
   (all 4 checks passing, live-verified, PR open and clean). **Do not merge it
   yourself.** Post the verification output in the PR description, then stop
   and tell the Lead by name that PR is ready for a merge decision. Only
   resume Phase 2 after the Lead confirms it's merged.
 
-- [ ] **2.2 — Check `feat/frontend-ui` (PR #1) status. Do not fix it yourself.**
+- [x] **2.2 — Check `feat/frontend-ui` (PR #1) status. Do not fix it yourself.**
   As of this writing it still has: PR targets `main` instead of `dev`, 2 real
   lint errors in `InputForm.tsx` (`any` casts, lines ~43-44), and 2 missing
   features (hardcoded `paper_ids: ["paper-001"]` instead of a real paper
@@ -133,14 +133,14 @@ fixed). Everything below is still open, verified live as of 2026-08-14.
   alone and report its status — don't edit her files to force it through,
   that's exactly the mistake from Phase 1.
 
-- [ ] **2.3 — If frontend IS ready and merged too, do a full end-to-end
+- [x] **2.3 — If frontend IS ready and merged too, do a full end-to-end
   integration check on `dev`:** start the app, ask a real question, run a
   comparison across multiple papers, check the readiness output — the actual
   "first success test" from the project brief (a researcher asks 3 questions
   and compares 3 papers with no unsupported claims). Record what works and
   what doesn't.
 
-- [ ] **2.4 — Resolve any integration conflicts you find** (e.g. API response
+- [x] **2.4 — Resolve any integration conflicts you find** (e.g. API response
   shape mismatches between what the backend now returns and what the frontend
   expects) by coordinating through this file — document the mismatch here
   rather than silently picking a side if it touches another owner's file.
@@ -157,19 +157,19 @@ Re-check the whole merged `dev` branch against:
 - `docs/known-limitations.md` and `docs/Lead_Independent_Tasks_Checklist.md`
   (already-tracked open items).
 
-- [ ] **3.1** List every acceptance-criteria item, per role, with a status:
+- [x] **3.1** List every acceptance-criteria item, per role, with a status:
   done / partial / missing, and evidence for each (a command output, a file,
   a live test — not a guess).
-- [ ] **3.2** For anything **missing that's a pure engineering/infra gap**
+- [x] **3.2** For anything **missing that's a pure engineering/infra gap**
   (a missing test, a stale doc, a broken CI step) — fix it directly.
-- [ ] **3.3** For anything missing that requires **someone else's domain
+- [x] **3.3** For anything missing that requires **someone else's domain
   judgment** (approving a source, writing UI copy, deciding taxonomy content,
   anything the ground rules above say to not decide yourself) — do **not**
   invent it. Add it to `docs/known-limitations.md` with a clear owner and
   open a tracking issue instead, same pattern as issues #4/#5/#6.
-- [ ] **3.4** Update `docs/known-limitations.md` and
+- [x] **3.4** Update `docs/known-limitations.md` and
   `docs/Lead_Independent_Tasks_Checklist.md` to reflect the real end state.
-- [ ] **3.5** Write a final summary at the bottom of this file: what got
+- [x] **3.5** Write a final summary at the bottom of this file: what got
   fixed, what's still open, and what needs the Lead's direct decision.
 
 ---
@@ -745,3 +745,493 @@ Lint, type-check, build      pass  35s
 ```
 
 PR #8 remains open and unmerged. Phase 2 has not started.
+
+### 2026-08-17 — Phase 2.1 gate verified; waiting for merge decision
+
+WHAT I WAS DOING: Phase 2.1 — confirm the backend PR state before starting any further
+Phase 2 integration work.
+
+WHAT I FOUND: PR #8 is still open against `dev`, clean, non-draft, and CI-green, but it
+has not been merged. The PR description already contains the Phase 1 verification output.
+Per the hard rule, I did not merge it and did not start Phase 2.2.
+
+GitHub connector PR status:
+
+```text
+url: https://github.com/MohammedHssan11/scholarlens/pull/8
+state: open
+merged: false
+mergeable: true
+draft: false
+base: dev
+head: feat/backend-api
+head_sha: 97f1d085fd9e377f1241630410c535535c4c14a2
+```
+
+`gh pr view 8 --repo MohammedHssan11/scholarlens --json ...` showed:
+
+```text
+state: OPEN
+isDraft: false
+baseRefName: dev
+headRefName: feat/backend-api
+mergeStateStatus: CLEAN
+mergedAt: null
+GitGuardian Security Checks: SUCCESS
+Lint, type-check, build: SUCCESS
+```
+
+`git log --oneline --decorate -n 12 origin/dev` begins:
+
+```text
+2046aab (origin/dev) Merge pull request #7 from MohammedHssan11/chore/lead-doc-housekeeping
+588da76 Merge pull request #3 from MohammedHssan11/chore/ci-pipeline
+d678c3d (chore/lead-doc-housekeeping) docs: sync architecture.md and known-limitations.md with current state
+```
+
+`git merge-base --is-ancestor 97f1d085fd9e377f1241630410c535535c4c14a2 origin/dev`
+result:
+
+```text
+HEAD_IS_IN_ORIGIN_DEV=false
+```
+
+Mohammed Hassan Mahmoud must make the merge decision for PR #8 before Phase 2.2 starts.
+
+### 2026-08-17 — Phase 2.1 fully resolved after Lead merge
+
+Mohammed Hassan Mahmoud confirmed and completed the merge of PR #8 into `dev`. After
+fetching `origin/dev`, the local `dev` ref was fast-forwarded and the required
+`git log dev` verification showed:
+
+```text
+29c6734 (origin/dev, dev) Merge pull request #8 from MohammedHssan11/feat/backend-api
+97f1d08 (HEAD -> feat/backend-api, origin/feat/backend-api) docs: avoid repeating fabricated production metrics
+```
+
+The merge commit resolves to
+`29c67342d171307b6f4791459c1b2cc411d0112d`, with parents `2046aab6d7d8a8b12df9a4f2df68473882a1f360`
+and `97f1d085fd9e377f1241630410c535535c4c14a2`. A direct ancestry check returned
+`BACKEND_HEAD_IN_DEV=true`. Item 2.1 is fully resolved; Codex did not perform the merge.
+
+### 2026-08-17 — Phase 2.2 frontend PR status check
+
+PR #1 (`feat/frontend-ui`, head `5650ad4dcaa835827a977f59bc109f928e0d3772`)
+is still open and unmerged. It still targets `main`, not `dev`.
+
+A read-only targeted lint check of the remote branch's `InputForm.tsx` returned exactly
+the two known errors:
+
+```text
+src/components/scholarlens/InputForm.tsx
+  43:82  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  44:24  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+✖ 2 problems (2 errors, 0 warnings)
+```
+
+Source inspection at that same commit found the request body still hardcodes
+`paper_ids: ["paper-001"]`. There is no paper picker. The branch contains backend helper
+definitions for `compare_papers()` and `research_readiness()`, but no frontend component
+calls them or supplies compare/readiness actions, and there is no compare/readiness UI.
+No file on `feat/frontend-ui` was edited; issue #5 remains Doodiiii's tracking item.
+
+### 2026-08-17 — Phase 2.3 direct API journey (safe-error path only)
+
+Per the Lead's instruction for this run, the merged API was exercised directly because
+PR #1 is not ready or merged. The active manifest contains six real paper IDs:
+`paper-001`, `paper-002`, `paper-003`, `paper-004`, `paper-008`, and `paper-009`.
+All six corresponding PDF files were present and non-empty.
+
+The live health response proved the corpus was ready but no generation provider was
+configured:
+
+```text
+---HEALTH---
+HTTP_STATUS=200
+RESPONSE={"status":"ok","corpus":{"paper_count":6,"paper_ids":["paper-001","paper-002","paper-003","paper-004","paper-008","paper-009"],"unavailable_paper_ids":[]},"providers":{"groq":false,"gemini":false}}
+```
+
+The three real ask requests and responses were:
+
+```text
+---ASK_1---
+REQUEST={"action":"ask","question":"How does agentic retrieval-augmented generation differ from conventional RAG?","paper_ids":["paper-001","paper-003","paper-004"]}
+HTTP_STATUS=504
+RESPONSE={"error":"AI provider is temporarily unavailable. Please try again later.","code":"PROVIDER_ERROR"}
+---ASK_2---
+REQUEST={"action":"ask","question":"When should a RAG system use System 2 reasoning instead of System 1 reasoning?","paper_ids":["paper-002","paper-003","paper-009"]}
+HTTP_STATUS=504
+RESPONSE={"error":"AI provider is temporarily unavailable. Please try again later.","code":"PROVIDER_ERROR"}
+---ASK_3---
+REQUEST={"action":"ask","question":"What challenges arise in multimodal retrieval-augmented generation?","paper_ids":["paper-001","paper-008","paper-009"]}
+HTTP_STATUS=504
+RESPONSE={"error":"AI provider is temporarily unavailable. Please try again later.","code":"PROVIDER_ERROR"}
+```
+
+The real three-paper comparison and readiness requests and responses were:
+
+```text
+---COMPARE---
+REQUEST={"action":"compare","question":"Compare how these papers address retrieval, reasoning, and evidence grounding.","paper_ids":["paper-001","paper-002","paper-003"]}
+HTTP_STATUS=504
+RESPONSE={"error":"AI provider is temporarily unavailable. Please try again later.","code":"PROVIDER_ERROR"}
+---READINESS---
+REQUEST={"action":"readiness","question":"Is the selected evidence sufficient for a grounded comparison of agentic RAG approaches?","paper_ids":["paper-001","paper-002","paper-003"]}
+HTTP_STATUS=504
+RESPONSE={"error":"AI provider is temporarily unavailable. Please try again later.","code":"PROVIDER_ERROR"}
+```
+
+Server logs proved that every request loaded real corpus content before the safe error:
+
+```text
+ASK_1:     3 papers, 431 chunks scanned, 290 above threshold, 8 returned, top=0.2566
+ASK_2:     3 papers, 274 chunks scanned, 144 above threshold, 8 returned, top=0.2003
+ASK_3:     3 papers, 392 chunks scanned, 213 above threshold, 8 returned, top=0.3317
+COMPARE:   3 papers, 340 chunks scanned, 191 above threshold, 8 returned, top=0.1652
+READINESS: 3 papers, 340 chunks scanned, 170 above threshold, 8 returned, top=0.2046
+Groq not configured, trying Gemini directly.
+Gemini not configured.
+Action dispatch failed: ProviderError: All AI providers failed.
+```
+
+This is **not a full pass** of the success journey. It verifies real retrieval and safe
+failure for all required actions, but no structured evidence, comparison matrix, or
+readiness report could be produced without a configured real provider key.
+
+### 2026-08-17 — Phase 2.4 integration mismatches documented
+
+No other owner's file was changed. The following mismatches require coordination or are
+carried into the Phase 3 engineering/documentation audit:
+
+1. PR #1 only sends the default `ask` request and hardcodes one paper. The merged API
+   supports `ask`, `compare`, and `readiness`, and the approved readiness threshold
+   requires three distinct papers. The frontend therefore cannot exercise the backend's
+   comparison or readiness response shapes and cannot satisfy the normal readiness path.
+2. PR #1 names every non-success state `provider-error`, while the backend can return
+   validation, unknown-paper, rate-limit, corpus, provider, and internal error codes.
+   The message is displayed, but the frontend state model does not match the backend's
+   error taxonomy.
+3. `docs/architecture.md` still describes grounding as Gemini File Search and retains an
+   open File Search storage decision. The merged backend actually uses the Lead-approved
+   provider-neutral local TF-IDF retriever before either Groq or Gemini.
+4. The legacy `buildBaselineAnswer()` comment in `service.ts` says the route uses sample
+   data when providers are unconfigured. The merged route does not call it; the observed
+   behavior is a safe `504 PROVIDER_ERROR` after real retrieval.
+5. `tests/acceptance-matrix.md` still labels invalid-input, malformed-JSON, comparison,
+   and readiness implementation as pending even though routes/tests now exist. Live
+   success for comparison/readiness remains unverified without a provider key.
+6. `docs/api-contracts.md` documents POST actions but not the real GET health response
+   used here (`status`, corpus availability, and provider flags).
+
+Phase 2.4 records these facts only. Frontend items remain with Doodiiii/issue #5;
+Lead-owned and backend-owned stale documentation/comments are evaluated under Phase 3.
+
+### 2026-08-17 — Phase 3.1 full role-by-role audit
+
+Audit baseline: local `dev` at merge commit
+`29c67342d171307b6f4791459c1b2cc411d0112d`. Requirements were extracted directly
+from `docs/AI_in_Applications_HANDBOOK (1).xlsx`, sheet `T01 ScholarLens` (session
+gates and personal acceptance criteria) and sheet `SCORING RUBRIC`, plus all three
+rendered pages of `docs/ScholarLens_Architecture.pdf`. `done` means direct evidence
+exists; `partial` means only part of the requirement is evidenced; `missing` means no
+acceptable evidence was found.
+
+The workbook contains five original work packages. Ahmed Mossad Elgammal's Evaluation
+& Production work was redistributed after his withdrawal, so it is audited below as an
+inherited Lead work package rather than silently omitted from the requested four current
+roles.
+
+#### Mohammed Hassan Mahmoud — session gates (`T01 ScholarLens!C23`)
+
+| Gate | Status | Real evidence |
+|---|---|---|
+| Session 1 — baseline, repository/branch/communication rules, architecture | partial | `CONTRIBUTING.md`, `README.md`, and architecture docs exist; no evidence proves every member ran the baseline, and `Doodiiii` identity remains unresolved. |
+| Session 2 — freeze scope/contracts, merge structured output, branch compatibility | partial | Zod/API contracts and backend PR #8 are merged; frontend PR #1 still targets `main`, has lint errors, and is not contract-complete. |
+| Session 3 — integrate grounding/tools, resolve interfaces, verify full journey | partial | Local TF-IDF, tools, and API actions are merged and tested; direct calls reached real retrieval, but provider-backed success and UI integration are missing. |
+| Session 4 — release branch, environment, build, deployment, rollback/checklist | partial | Environment template, clean local build, release checklist, and rollback plan exist; no verified preview/production deployment or smoke evidence exists. |
+| Session 5 — final release/demo/defense | missing | No tagged release, production demo, final sign-off, or individual defense evidence exists. |
+
+#### Mohammed Hassan Mahmoud — personal acceptance (`T01 ScholarLens!C24`)
+
+| # | Criterion | Status | Real evidence |
+|---|---|---|---|
+| L1 | Repository, branch rules, issue ownership, and PR review documented | done | `CONTRIBUTING.md`; issues #4/#5/#6/#9/#10; merged PRs #2/#3/#7/#8. |
+| L2 | Architecture and all module/API contracts documented and agreed | partial | Markdown/API docs exist and were corrected to local TF-IDF; the architecture PDF is stale and frontend ownership/contracts remain unresolved. |
+| L3 | Every member has an identifiable contribution merged through review | partial | Lead, Mariam Eladawy, and AlBaraa commits are in `dev`; PR #1 is open/unmerged and its author's identity is unresolved. |
+| L4 | Lint, type-check, tests, and production build complete without errors | done | Fresh 2026-08-17 run: all four exited 0; exact output is recorded under Phase 3.2 below. |
+| L5 | Environment variables documented; no secret committed/exposed | done | `.env.example` now lists only the two runtime provider keys with empty values; env files/corpus PDFs are ignored; post-build client scan found zero provider-key pattern matches; PR #8 GitGuardian check was green. |
+| L6 | Preview and production URLs complete the main journey | missing | Both URL fields are blank; no deployment or provider-backed success evidence exists. Issue #10. |
+| L7 | Release checklist, known limitations, rollback/recovery notes present | done | `docs/release-checklist.md`, updated `docs/known-limitations.md`, and rollback steps in `docs/production-readiness.md`. This does not mean the release checklist has passed. |
+| L8 | Every answer is traceable/not-found; comparison uses selected approved papers | partial | Backend allowlist, exact-title/snippet filtering, and deterministic tools are automated; no provider-backed successful answer/comparison exists and the UI hardcodes one paper. |
+
+#### AlBaraa — session gates (`T01 ScholarLens!C36`)
+
+| Gate | Status | Real evidence |
+|---|---|---|
+| Session 1 — browser → route → validation → provider → response | done | Route/service/provider layers and the live safe-error browser/API path show the complete boundary. |
+| Session 2 — schemas, validation, prompts, providers, API tests | done | `schema.ts`, `prompts.ts`, `providers.ts`, route tests, and schema tests are merged. |
+| Session 3 — grounded retrieval/tools, argument validation, normal/failure docs | done | `agent-rag.ts`, allowlist validation, deterministic tools, API docs, and backend notes exist. |
+| Session 4 — fallback, timeouts, safe errors, limits, logs, regression tests | done | Provider chain, 20s timeouts, rate limits, redaction, hashed IP logging, regression tests, and live safe 504 behavior are evidenced. |
+| Session 5 — defend backend design and failure handling | missing | Human defense cannot be inferred from code or commits. |
+
+#### AlBaraa — personal acceptance (`T01 ScholarLens!C37`)
+
+| # | Criterion | Status | Real evidence |
+|---|---|---|---|
+| B1 | Valid input returns documented typed response | partial | Mocked route/service responses and Zod response schemas pass; no real provider success response was available. |
+| B2 | Invalid/malformed input returns safe 4xx without provider | done | Route/schema tests cover malformed JSON and validation; Phase 1 live checks observed safe 400 responses before provider dispatch. |
+| B3 | Provider secrets server-side and absent from client/history | done | Server-only `process.env` access, ignored env files, empty template, zero client-bundle pattern matches, and GitGuardian PR evidence. |
+| B4 | Groq/Gemini fallback or documented safe provider failure demonstrated | done | Direct ask/compare/readiness calls retrieved real chunks, found both providers unconfigured, and returned safe 504 responses. |
+| B5 | Grounding/tool arguments validated; deterministic logic separated | done | Manifest allowlist, Zod request schema, `agent-rag.ts`, `compare_papers()`, and `research_readiness()` with automated tests. |
+| B6 | Normal, not-found, timeout/provider-error, and tool-failure tests | partial | Normal/filtering, not-found, provider-error, corpus-error, and tool tests exist; real timeout and provider-backed evaluation cases are not demonstrated. |
+| B7 | Useful logs without secrets/unnecessary user data | done | Live logs use action, paper count, question length, hashed IP, retrieval metrics, and redacted errors; raw questions/keys are not logged. |
+| B8 | Traceable answer/not-found and selected-paper comparison | partial | Three deterministic post-provider checks enforce source/title/snippet; provider-backed successful output is still missing. |
+
+#### Mariam Ali / Doodiiii — session gates (`T01 ScholarLens!C49`)
+
+| Gate | Status | Real evidence |
+|---|---|---|
+| Session 1 — baseline form/result and required states | partial | Merged `dev` has form, loading, result, and generic error components; validation/retry are incomplete. PR #1 has more states but is unmerged and lint-failing. |
+| Session 2 — main workflow and validated structured output UI | partial | Ask/result components consume the typed ask shape; paper selection, comparison, readiness, and export are absent. |
+| Session 3 — sources, tool progress/results, not-found/failure UX | missing | Evidence panel code exists, but no live provider success or tool-result UI exists. |
+| Session 4 — accessibility, responsive behavior, production states | partial | Playwright verified labeled input, focusable controls, alert output, and usable 390×844/1440×900 layouts; retry and full workflow are missing. |
+| Session 5 — live journey and interaction defense | missing | No complete demo or human defense evidence. |
+
+#### Mariam Ali / Doodiiii — personal acceptance (`T01 ScholarLens!C50`)
+
+| # | Criterion | Status | Real evidence |
+|---|---|---|---|
+| U1 | First-time user completes main workflow without explanation | missing | Current page only asks against hardcoded `paper-001`; compare/readiness/export cannot be reached. |
+| U2 | Idle/loading/success/empty/validation/provider/retry states correct | partial | Loading, provider error, not-found/result rendering exist; current `dev` has no custom validation state or retry control, and success was unavailable. |
+| U3 | Structured output rendered without arbitrary prose parsing | done | `ResultView` and `EvidencePanel` consume typed fields; no prose parser is used. |
+| U4 | Evidence/source and tool results distinguishable from model explanation | partial | Evidence cards separate source fields; no comparison/readiness/tool surface exists. |
+| U5 | Main flow works at mobile and desktop widths | partial | Playwright showed no overlap at 390×844 and 1440×900; full main flow is unavailable. |
+| U6 | Labels, keyboard access, focus, understandable errors | partial | Label, native input/button keyboard behavior, focus ring, and alert are present; retry and explicit validation UX are missing. |
+| U7 | No provider credential in client code | done | Source search and built-client scan found no provider key values/patterns. |
+| U8 | Traceable answer/not-found; comparison only selected papers | partial | Ask result components support snippets/not-found, but successful rendering is unverified and comparison/selection UI is absent. |
+
+#### Mariam Eladawy — session gates (`T01 ScholarLens!C62`)
+
+| Gate | Status | Real evidence |
+|---|---|---|
+| Session 1 — approved sources, edge cases, deterministic action | done | Narrow Agentic RAG topic, source register, 12 cases, and two deterministic tools exist. |
+| Session 2 — fields, criteria, trusted content, five core cases | done | Ten evidence fields, readiness thresholds, source register, and five normal cases exist. |
+| Session 3 — bounded corpus, tool rules, traceability/not-found | partial | Six confirmed manifest papers and exact-snippet enforcement are active; evaluation/source docs still map to inactive IDs and provider-backed not-found is unverified. |
+| Session 4 — 10-case evaluation, injection tests, source checks, production docs | partial | Twelve cases are defined, but mappings are stale, injection outcomes are not executable/provider-backed, and licence/URL checks remain open. |
+| Session 5 — grounding/tool/evaluation defense | missing | Human defense evidence is absent. |
+
+#### Mariam Eladawy — personal acceptance (`T01 ScholarLens!C63`)
+
+| # | Criterion | Status | Real evidence |
+|---|---|---|---|
+| K1 | Bounded corpus/register with URL, access date, owner, intended use | partial | Register has 10 entries and summaries; active manifest has six, several URLs/licences are unresolved, and docs disagree about active approval. Issue #9. |
+| K2 | Taxonomy and deterministic rules documented with examples | partial | Fields, question types, and thresholds exist; TODOs still request agreed examples and source docs use inactive-paper examples. |
+| K3 | At least 10 cases across required categories | partial | JSON contains 12 cases across all named categories, but normal cases reference inactive 005/007/010 and are not an executable acceptance run. |
+| K4 | Unsupported questions clarify/refuse/escalate without fabrication | partial | Prompt rules and no-chunk handling are safe; provider-backed unsupported/injection outcomes were not demonstrated. |
+| K5 | Every AI-generated domain claim checked against original source | missing | Review docs assert validation but provide no claim-by-claim original-text evidence and contain active-corpus contradictions. |
+| K6 | Tool success/failure behavior tested and evidenced | done | `tests/api/tools.test.ts` and regression tests cover normal, duplicates, empty evidence, short snippets, and deterministic repeatability. |
+| K7 | Coverage gaps and prohibited uses documented | done | `docs/source-register.md` coverage gaps and `docs/known-limitations.md` prohibited uses. |
+| K8 | Traceable answer/not-found; comparison only selected papers | partial | Backend filters and tools enforce this in code/tests; provider-backed success remains absent. |
+
+#### Evaluation & Production — inherited Lead work (`T01 ScholarLens!C75`)
+
+| Gate | Status | Real evidence |
+|---|---|---|
+| Session 1 — independent baseline, setup defects, smoke cases | partial | Acceptance matrix and detailed blockers exist; no fresh clean-environment run was performed in this audit. |
+| Session 2 — structured-flow evidence and independent acceptance | partial | Automated route/schema/service tests exist; no provider-backed structured success. |
+| Session 3 — retrieval/tool evaluation and not-found smoke | partial | Real retrieval and tool tests exist; stale source mappings and missing provider block full evaluation. |
+| Session 4 — deployment smoke, observability, limitations, regression | missing | Known limitations/regression tests exist, but deployment smoke/observability evidence does not. |
+| Session 5 — independent production evidence and release defense | missing | No production deployment, release sign-off, or defense. |
+
+#### Evaluation & Production — personal acceptance (`T01 ScholarLens!C76`)
+
+| # | Criterion | Status | Real evidence |
+|---|---|---|---|
+| E1 | Clean install/run from written instructions | partial | README, lockfile, `npm ci` CI step, and corpus setup exist; no fresh clean release environment was independently completed here. |
+| E2 | Versioned matrix covers every mandatory feature/failure | partial | Matrix exists and was synchronized with implemented tests, but export/full UI/provider acceptance remain pending. |
+| E3 | Dated local, preview, production smoke tests | missing | Dated local safe-error audit exists; preview/production do not. |
+| E4 | Regression verifies request, structured output, grounding, tools | done | Eight Vitest files/82 tests passed, including route dispatch, schema, filtering, real-PDF retrieval, tools, and safe errors. |
+| E5 | Deployment evidence has logs, URL, env checklist, screenshots | missing | No verified deployment or URL. |
+| E6 | Latency/error observations and limitations honest | partial | Local retrieval metrics/errors and limitations are recorded; production observations are blank. |
+| E7 | Final release independently checked against scoring rubric | done | This dated Phase 3 audit covers every rubric area below; it does not sign off a release. |
+| E8 | Traceable answer/not-found; comparison only selected papers | partial | Automated trust boundary is strong; provider-backed and UI success paths are incomplete. |
+
+#### `SCORING RUBRIC` audit (`SCORING RUBRIC!A5:E13`)
+
+| Area | Points | Status | Evidence / blocker |
+|---|---:|---|---|
+| Functional completeness | 15 | missing | Mandatory paper library/selection, comparison UI, readiness UI, export, and provider-backed success are absent. |
+| Architecture & integration | 15 | partial | Backend is modular and merged; frontend PR is unmerged/incompatible and the PDF is stale. |
+| Reliability & test evidence | 15 | partial | 82 automated tests pass, but the 12-case provider evaluation is not executable/reconciled. |
+| Security & safe AI behavior | 15 | done | Server validation, allowlists, rate limiting, redaction, exact-snippet checks, ignored secrets, safe errors, and client scan are evidenced. |
+| Grounding, tools & AI correctness | 10 | partial | Real local retrieval and deterministic tools are tested; provider-backed claims/not-found/injection remain unverified. |
+| Deployment & operations | 10 | missing | Only localhost is evidenced; preview/production URLs and smoke evidence are absent. |
+| UX, accessibility & workflow | 10 | partial | Baseline is responsive/labeled with loading/error output; core workflow, retry, and tool surfaces are missing. |
+| Documentation & integration | 5 | partial | Core docs and ownership exist and stale Markdown was corrected; source docs/PDF/identity still conflict with reality. |
+| Individual defense | 5 | missing | Requires live human evidence; none was found. |
+
+Architecture PDF visual review: page 1 labels the environment as Vercel production and
+the grounding layer as Gemini File Search; page 2 repeats Gemini File Search and shows a
+decision still open; page 3 requires selection, comparison, readiness/export, the
+three-question/three-paper success test, and a public production URL. Those are useful
+target diagrams but do not describe the current deployed state. The correction requires
+Lead ownership and is tracked in issue #10; the source PDF was not silently rewritten.
+
+### 2026-08-17 — Phase 3.2 engineering and documentation fixes
+
+Pure engineering/infra gaps fixed on `codex/phase-2-3-audit`:
+
+- Removed the unused `buildBaselineAnswer()` placeholder evidence path and its tests.
+- Added route integration tests for compare dispatch, readiness dispatch, safe provider
+  errors, and safe corpus errors.
+- Extended CI with Python setup, reproducible `npm run fetch-corpus`, and `npm test`.
+- Set the documented Next.js 16 `turbopack.root` to the repository working directory;
+  the production build no longer emits the wrong-workspace-root warning.
+- Removed unused Gemini File Search/Crossref variables from `.env.example`; only actual
+  provider variables remain.
+- Corrected `docs/architecture.md` to the Lead-approved local TF-IDF design.
+- Documented the real GET health contract and 503/504 behavior in
+  `docs/api-contracts.md`.
+- Added the factual 2026-08-17 local safe-error observation to
+  `docs/production-readiness.md`.
+- Synchronized `tests/acceptance-matrix.md` statuses with real automated/live evidence.
+
+All four required checks were then run from the beginning.
+
+`npm run lint` (exit 0):
+
+```text
+> scholarlens-app@0.1.0 lint
+> eslint
+```
+
+`npx tsc --noEmit` (exit 0):
+
+```text
+```
+
+`npm run build` (exit 0):
+
+```text
+> scholarlens-app@0.1.0 build
+> next build
+
+▲ Next.js 16.2.11 (Turbopack)
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 4.7s
+  Running TypeScript ...
+  Finished TypeScript in 3.9s ...
+  Collecting page data using 7 workers ...
+  Generating static pages using 7 workers (0/6) ...
+  Generating static pages using 7 workers (1/6)
+  Generating static pages using 7 workers (2/6)
+  Generating static pages using 7 workers (4/6)
+✓ Generating static pages using 7 workers (6/6) in 964ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ƒ /api/scholarlens
+└ ○ /scholarlens
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+```
+
+`npx vitest run` (exit 0):
+
+```text
+ RUN  v4.1.10 C:/Users/mh978/Downloads/scholarlens-app
+
+ Test Files  8 passed (8)
+      Tests  82 passed (82)
+   Start at  14:53:29
+   Duration  1.44s (transform 962ms, setup 0ms, import 3.29s, tests 566ms, environment 1ms)
+```
+
+Post-build client scan output:
+
+```text
+CLIENT_BUNDLE_SECRET_PATTERN_MATCHES=0
+```
+
+### 2026-08-17 — Phase 3.3/3.4 owner escalations and reality sync
+
+- Existing issue #5 remains the frontend owner record for retargeting/lint, paper
+  selection, comparison/readiness, and export UI.
+- Opened issue #9 and assigned `mariam-eladawy05`: reconcile inactive evaluation IDs,
+  source/licence status, the active manifest, knowledge docs, and the missing one-page
+  research rubric. No source was approved or remapped by Codex.
+- Opened issue #10 and assigned `MohammedHssan11`: provide a real provider-backed
+  three-question/three-paper success run, real preview/production evidence, architecture
+  PDF reconciliation, ownership confirmation, release sign-off, and individual defense.
+- Updated `docs/known-limitations.md` and
+  `docs/Lead_Independent_Tasks_Checklist.md` to remove stale pre-merge claims and link
+  every open owner-dependent gap to issues #5, #9, or #10.
+
+No deployment URL, provider success, source approval, licence clearance, identity, metric,
+release approval, or human defense was inferred or fabricated.
+
+### 2026-08-17 — Phase 3.5 final escalation summary
+
+**WHAT IS FIXED**
+
+- PR #8's Lead-performed merge into `dev` is verified at
+  `29c67342d171307b6f4791459c1b2cc411d0112d`.
+- The merged backend now has no callable placeholder-answer path. Valid requests use real
+  corpus retrieval and either return verified provider evidence or a safe error.
+- Compare/readiness route dispatch and provider/corpus safe-error contracts have direct
+  integration tests.
+- CI now installs Python, fetches the six confirmed corpus papers, and runs Vitest in
+  addition to lint, type-check, and build.
+- Next.js uses the repository as its explicit Turbopack root; the prior build warning is
+  gone.
+- API, retrieval architecture, environment template, acceptance matrix, production
+  observation, known limitations, and Lead checklist now describe the real state.
+- Fresh local verification is clean: lint 0, TypeScript 0, build 0, Vitest 8/8 files and
+  82/82 tests, plus zero provider-key pattern matches in the built client bundle.
+- The complete workbook/PDF/rubric audit is recorded above, role by role and item by item.
+
+**WHAT IS STILL OPEN**
+
+- [Issue #5](https://github.com/MohammedHssan11/scholarlens/issues/5): PR #1 still
+  targets `main`, still has two lint errors, hardcodes one paper, and has no
+  comparison/readiness/export UI. It remains Doodiiii's work; no frontend file was edited.
+- [Issue #9](https://github.com/MohammedHssan11/scholarlens/issues/9): the source
+  register, knowledge docs, and evaluation cases must be reconciled with the six-paper
+  active manifest; inactive IDs, licence/URL checks, and the missing one-page rubric need
+  Mariam Eladawy's original-source judgment.
+- [Issue #10](https://github.com/MohammedHssan11/scholarlens/issues/10): a real provider
+  key, provider-backed three-question/three-paper run, verified preview/production URLs,
+  deployment smoke evidence, corrected architecture PDF, release sign-off, and individual
+  defenses are absent.
+- Existing issue #4 is factually resolved by merged PR #8 but remains open on GitHub;
+  issue #6 also remains open and should be reconciled by its owner against the current
+  knowledge files and fresh checks.
+- ScholarLens is **not production-ready**. The first-pilot success test did **not** pass:
+  all five required direct actions retrieved real chunks but returned safe 504 errors
+  because no provider was configured.
+
+**WHAT NEEDS MOHAMMED HASSAN MAHMOUD'S DIRECT DECISION**
+
+1. Confirm whether `Doodiiii` is Mariam Ali, a replacement member, or another contributor,
+   then finalize ownership and defense expectations.
+2. Decide and configure the non-committed provider/deployment environment, then supply only
+   real preview/production URLs and observed smoke evidence.
+3. Coordinate issue #9 with Mariam Eladawy; do not activate or remap a source without her
+   verified original-source/licence review and Lead approval.
+4. Review the Phase 3 audit PR and its remote checks, then make the merge decision. Codex
+   will not merge it into `dev` or `main`.
+5. Decide when the frontend, provider-backed journey, source reconciliation, release
+   checklist, and human defenses are sufficient for an actual release candidate.
+
+**AUDIT PR STATUS**
+
+- Draft [PR #11](https://github.com/MohammedHssan11/scholarlens/pull/11) is open from
+  `codex/phase-2-3-audit` to `dev`; Codex has not merged it.
+- Remote checks on commit `9a1f4c5a0dc7435459a985395ccd666be75bd6ab` completed
+  successfully: GitGuardian Security Checks passed, and the expanded CI job (including
+  corpus fetch and Vitest) passed in 49 seconds.

@@ -10,6 +10,13 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { POST, GET } from "../../src/app/api/scholarlens/route";
 import { apiRateLimiter } from "../../src/lib/ai/rate-limiter";
+import {
+  handleAsk,
+  handleCompare,
+  handleReadiness,
+} from "../../src/lib/scholarlens/service";
+import { ProviderError } from "../../src/lib/ai/providers";
+import { CorpusUnavailableError } from "../../src/lib/scholarlens/agent-rag";
 
 // Mock the service layer so we don't make real AI calls in route tests
 vi.mock("../../src/lib/scholarlens/service", async (importOriginal) => {
@@ -83,6 +90,82 @@ describe("API Route: POST /api/scholarlens", () => {
     
     const data = await response.json();
     expect(data.question).toBe("mocked");
+    expect(handleAsk).toHaveBeenCalledWith({
+      action: "ask",
+      question: "What is the impact of AI?",
+      paper_ids: ["paper-001"],
+    });
+  });
+
+  it("dispatches compare requests and returns the comparison contract", async () => {
+    const req = createRequest({
+      action: "compare",
+      question: "Compare the selected papers",
+      paper_ids: ["paper-001", "paper-002", "paper-003"],
+    });
+
+    const response = await POST(req);
+    expect(response.status).toBe(200);
+
+    const data = await response.json();
+    expect(data).toEqual({ question: "mocked", matrix: [], paper_count: 0 });
+    expect(handleCompare).toHaveBeenCalledOnce();
+  });
+
+  it("dispatches readiness requests and returns the readiness contract", async () => {
+    const req = createRequest({
+      action: "readiness",
+      question: "Is this evidence research ready?",
+      paper_ids: ["paper-001", "paper-002", "paper-003"],
+    });
+
+    const response = await POST(req);
+    expect(response.status).toBe(200);
+
+    const data = await response.json();
+    expect(data).toEqual({
+      papers_used: 0,
+      every_claim_has_a_snippet: false,
+      gaps: [],
+      ready: false,
+    });
+    expect(handleReadiness).toHaveBeenCalledOnce();
+  });
+
+  it("returns a safe provider error without exposing internal details", async () => {
+    vi.mocked(handleAsk).mockRejectedValueOnce(
+      new ProviderError("sensitive provider detail", "groq", 504),
+    );
+
+    const response = await POST(createRequest({
+      action: "ask",
+      question: "Valid provider failure question",
+      paper_ids: ["paper-001"],
+    }));
+
+    expect(response.status).toBe(504);
+    await expect(response.json()).resolves.toEqual({
+      error: "AI provider is temporarily unavailable. Please try again later.",
+      code: "PROVIDER_ERROR",
+    });
+  });
+
+  it("returns a safe corpus error when approved content is unavailable", async () => {
+    vi.mocked(handleAsk).mockRejectedValueOnce(
+      new CorpusUnavailableError("sensitive corpus path"),
+    );
+
+    const response = await POST(createRequest({
+      action: "ask",
+      question: "Valid corpus failure question",
+      paper_ids: ["paper-001"],
+    }));
+
+    expect(response.status).toBe(503);
+    await expect(response.json()).resolves.toEqual({
+      error: "The approved paper corpus is not ready. Add approved paper metadata and text before asking questions.",
+      code: "CORPUS_UNAVAILABLE",
+    });
   });
 
   it("rejects invalid JSON", async () => {
