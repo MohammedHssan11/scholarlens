@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "papers": [
+    {
+      "source_id": "paper-001",
+      "content_path": "paper-001.pdf",
+      "title": "Agentic Retrieval-Augmented Generation: A Survey on Agentic RAG"
+    },
+    {
+      "source_id": "paper-002",
+      "content_path": "paper-002.pdf",
+      "title": "Reasoning RAG via System 1 or System 2"
+    },
+    {
+      "source_id": "paper-003",
+      "content_path": "paper-003.pdf",
+      "title": "Retrieval-Augmented Generation: A Comprehensive Survey of Architectures"
+    },
+    {
+      "source_id": "paper-004",
+      "content_path": "paper-004.pdf",
+      "title": "A Systematic Review of Key Retrieval-Augmented Generation (RAG) Systems"
+    },
+    {
+      "source_id": "paper-008",
+      "content_path": "paper-008.pdf",
+      "title": "Ask in Any Modality: A Comprehensive Survey on Multimodal Retrieval-Augmented Generation"
+    },
+    {
+      "source_id": "paper-009",
+      "content_path": "paper-009.pdf",
+      "title": "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks"
+    }
+  ]
+}
