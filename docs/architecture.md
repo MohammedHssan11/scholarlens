@@ -13,7 +13,7 @@ Browser (UI)
    ▼
 Route handler  →  validation  →  service
                                    ├─→ providers.ts   (Groq → Gemini fallback)
-                                   ├─→ grounding      (Gemini File Search, approved corpus only)
+                                   ├─→ agent-rag.ts   (local TF-IDF, approved corpus only)
                                    └─→ tools.ts       (compare_papers, research_readiness)
    ▲
    │  structured answer + exact evidence snippet  (or not_found)
@@ -49,24 +49,20 @@ sent to the browser or included in the client bundle.
   whether Doodiiii is Mariam Ali, a new member, or someone else, and update this doc once
   known.
 
-## Open decision
+## Approved retrieval decision
 
-> **Where are papers and chunks stored?** Gemini File Search store only, or also a
-> database for metadata? — to be decided by the Lead with AlBaraa.
-
-**Proposed answer (not yet confirmed):** Gemini File Search store only for the prototype/beta.
-The approved corpus is small (10 papers) and fully described in `docs/source-register.md`,
-so a separate metadata database would add operational cost (another service to secure,
-deploy, and back up) without a clear benefit at this scale. Revisit if the corpus grows
-past what one narrow topic needs, or if the team needs to query metadata outside of what
-File Search's retrieval already returns. **This is a suggestion, not a decision — needs
-sign-off from the Lead and AlBaraa before it's final.**
+Mohammed Hassan Mahmoud approved the provider-neutral local TF-IDF retrieval strategy on
+2026-08-15. Approved PDFs are downloaded into the gitignored `data/corpus` directory by
+`npm run fetch-corpus`; metadata remains in the tracked manifest and source register.
+`agent-rag.ts` retrieves the same source-labelled chunks before either Groq or Gemini is
+called, so both generation providers use the same bounded evidence context. No Gemini
+File Search store or separate metadata database is used by the current prototype.
 
 ## External services (approved)
 
 | Service | Use |
 |---|---|
-| Gemini File Search | Grounded retrieval over the approved corpus |
-| Groq API | Fast generation (primary), Gemini as fallback |
+| Groq API | Primary structured evidence generation |
+| Gemini API | Fallback structured evidence generation |
 | Crossref REST API | DOI and publication metadata |
-| arXiv API | Paper metadata and abstracts |
+| arXiv | Confirmed paper downloads and metadata |

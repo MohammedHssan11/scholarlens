@@ -18,7 +18,7 @@ See `.env.example`. All are **server-side only** — never prefixed with `NEXT_P
 
 | Date | Environment | Observation (latency / errors) |
 |---|---|---|
-| | | |
+| 2026-08-17 | Local | Health returned HTTP 200 with 6/6 manifest papers available. Groq and Gemini flags were both false. Three ask requests plus compare and readiness each retrieved 8 real corpus chunks, then returned the safe HTTP 504 `PROVIDER_ERROR`. This is not a successful provider or release smoke test. |
 
 ## Rollback plan
 

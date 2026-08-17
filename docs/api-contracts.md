@@ -7,6 +7,39 @@ This document defines the HTTP API boundaries for the ScholarLens backend. All r
 
 ---
 
+## Endpoint: `GET /api/scholarlens`
+
+Returns corpus-file availability and provider configuration without exposing secrets.
+It returns HTTP 200 only when at least one manifest paper is available and every manifest
+entry has a non-empty local content file; otherwise it returns HTTP 503.
+
+```json
+{
+  "status": "ok",
+  "corpus": {
+    "paper_count": 6,
+    "paper_ids": [
+      "paper-001",
+      "paper-002",
+      "paper-003",
+      "paper-004",
+      "paper-008",
+      "paper-009"
+    ],
+    "unavailable_paper_ids": []
+  },
+  "providers": {
+    "groq": false,
+    "gemini": false
+  }
+}
+```
+
+Provider flags report configuration presence only. They do not expose keys and do not
+prove that a provider request will succeed.
+
+---
+
 ## Endpoint: `POST /api/scholarlens`
 
 The single endpoint for all ScholarLens actions. It dispatches to specific sub-services based on the `action` field in the request.
@@ -118,5 +151,6 @@ Deterministically evaluates whether the selected evidence forms a research-ready
 | **400** | `VALIDATION_ERROR` | Schema failure (e.g., missing question, max length exceeded). | `{ "error": "Request validation failed.", "details": { ... } }` |
 | **400** | `UNKNOWN_PAPER_IDS` | Included paper IDs that are not in the approved corpus. | `{ "error": "Unknown paper_id(s): fake-id. Only approved papers..." }` |
 | **429** | `RATE_LIMITED` | Exceeded 10 requests per minute. | `{ "error": "Too many requests. Please wait before trying again." }` |
-| **504** | `PROVIDER_ERROR` | Both primary (Groq) and fallback (Gemini) providers timed out or failed. | `{ "error": "AI provider is temporarily unavailable. Please try again later." }` |
+| **503** | `CORPUS_UNAVAILABLE` | A selected approved corpus file cannot be loaded. | `{ "error": "The approved paper corpus is not ready..." }` |
+| **504** | `PROVIDER_ERROR` | No provider is configured, or both primary (Groq) and fallback (Gemini) failed. | `{ "error": "AI provider is temporarily unavailable. Please try again later." }` |
 | **500** | `INTERNAL_ERROR` | Unexpected server crash. | `{ "error": "An internal error occurred. Please try again later." }` |
