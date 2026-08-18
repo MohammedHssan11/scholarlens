@@ -1766,3 +1766,42 @@ no unavailable papers. The real `paper-010` GraphRAG question returned HTTP 200,
 one high-confidence verbatim evidence item, and `provider_used: groq`. These are
 local facts only: item 6.3 remains open until the Vercel deployment for this
 branch returns the same real GET and ask success.
+
+### 2026-08-19 — Phase 6.3 deployed preview blocked at provider configuration
+
+Implementation commit `dc00c75` was pushed to
+`codex/phase-6-vercel-fix`, and draft PR #20 was opened against `dev`:
+https://github.com/MohammedHssan11/scholarlens/pull/20. The GitHub connector
+returned `403 Resource not accessible by integration`; authenticated `gh` CLI
+was used as the documented fallback. No merge into `dev` or `main` was
+performed.
+
+Vercel built preview deployment `dpl_FVe9X2GrqePedWuJDD7htup5mjNJ` from that
+commit. Because Deployment Protection is enabled, direct anonymous fetches
+returned Vercel's login page; authenticated `vercel curl` supplied Vercel's own
+generated protection bypass without exposing or requesting a secret. The real
+deployed GET then returned `status: ok`, `paper_count: 10`, all ten manifest
+paper IDs, and `unavailable_paper_ids: []`.
+
+The preview reports `providers.groq: false` and `providers.gemini: false`. The
+required real `paper-010` ask reached the deployed parser and retrieval path,
+then returned the app's clean `PROVIDER_ERROR` rather than HTTP 200. Runtime
+logs prove the fixed native/PDF path executed successfully before that error:
+
+```text
+[AgentRAG] Retrieval: 1 papers, 102 chunks scanned, 41 above threshold,
+8 returned, top=0.2094, 523ms
+[ScholarLens] Context retrieval: 8 chunks from 1 papers in 523ms
+[ScholarLens] Groq not configured, trying Gemini directly.
+[ScholarLens] Gemini not configured.
+```
+
+This proves the deployed raw-500 defect and corpus-delivery defect are fixed,
+but it does not satisfy item 6.3's required successful deployed AI response.
+No production credential was copied into Preview, no Vercel environment setting
+was changed, and the feature branch was not deployed over production. Item 6.3
+and final completion of 6.4 remain open pending a Lead-owned decision: configure
+an AI provider for Vercel Preview and redeploy PR #20, or review/merge and
+promote through the normal `dev` then `main` path before the production smoke
+test. The second option still requires a second promotion to `main`; a merge to
+`dev` alone cannot update production.
