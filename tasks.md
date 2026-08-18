@@ -1235,3 +1235,70 @@ release approval, or human defense was inferred or fabricated.
 - Remote checks on commit `9a1f4c5a0dc7435459a985395ccd666be75bd6ab` completed
   successfully: GitGuardian Security Checks passed, and the expanded CI job (including
   corpus fetch and Vitest) passed in 49 seconds.
+
+---
+
+## Phase 4 — Expand the active corpus to 10 real papers (Lead-authorized, replaces Mariam's issue #9 scope for this one action)
+
+Mohammed Hassan Mahmoud is taking this specific action over from Mariam Eladawy
+directly — this is an explicit Lead decision, not something you decided on your
+own. Everything else in issue #9 (evaluation-case reconciliation, licence
+verification for the existing 6 papers) still belongs to her; do not touch those
+files beyond what's needed to add the new papers consistently.
+
+- [ ] **4.1 — Search for real replacement content for the 4 excluded slots first.**
+  The corpus was originally meant to have `paper-005`, `paper-006`, `paper-007`,
+  `paper-010` with these working titles (from the pre-exclusion source register):
+  - paper-005: "Agentic Retrieval-Augmented Generation: Advancing AI-Driven
+    Information Retrieval and Processing"
+  - paper-006: "MMA-RAG: A Survey on Multimodal Agentic Retrieval-Augmented
+    Generation"
+  - paper-007: "Graph-Based Agentic Retrieval-Augmented Generation: A
+    Comprehensive Survey"
+  - paper-010: "From Local to Global: A GraphRAG Approach to Query-Focused
+    Summarization" (this one may already be a real, well-known paper — verify
+    independently rather than assuming)
+
+  Use arXiv's real public search API (`http://export.arxiv.org/api/query`) to
+  search for each title/topic. Only treat a result as a match if the API
+  returns a real arXiv ID, real title, real authors, and you can actually fetch
+  the PDF/abstract text. Do not force a match — if a title doesn't correspond
+  to any real paper you can verify, treat that slot as open for 4.2 instead.
+
+- [ ] **4.2 — For any slot that can't be matched, search more broadly.**
+  Search arXiv for other real, on-topic papers in the Agentic RAG / RAG-agent
+  domain (similar to the 6 already-active papers) to fill the remaining slots.
+  It is fine to end up with fewer than 4 if you cannot verify enough real
+  papers — report the real count, do not pad it.
+
+- [ ] **4.3 — For every paper you add, all of this must be real and verified,
+  never invented:**
+  - Real arXiv ID, title, author(s), and year, confirmed from the actual API
+    response.
+  - Real fetchable PDF text (extend `download_papers.py` the same way the
+    existing 6 are fetched — no placeholder/filler text under any
+    circumstance, this is exactly the mistake that happened before).
+  - Add the entry to `data/corpus/manifest.json` and `download_papers.py`.
+  - Add an accurate row to `docs/source-register.md` with
+    `Approved by: Mohammed Hassan Mahmoud` and today's real date — but present
+    the full list to the Lead for a final look in the PR description before
+    assuming it's final.
+
+- [ ] **4.4 — Keep Mariam's other files consistent, but don't do her review
+  work for her.** Update `knowledge/scholarlens/corpus-index.md` and
+  `source-mapping.md` to list the new papers factually (title, topic) — do
+  not write new evaluation cases, taxonomy examples, or licence
+  determinations on her behalf. Leave a note for her in issue #9 listing
+  exactly which papers were added so she can fold them into her own
+  reconciliation work rather than duplicate it.
+
+- [ ] **4.5 — Full verification pass + live check.** All four checks clean,
+  then live-verify `GET /api/scholarlens` reports the new, real paper_count,
+  and run at least one real `ask` against one of the newly added papers to
+  confirm retrieval + evidence verification works on it, the same way it was
+  verified on the original 6.
+
+- [ ] **4.6 — Push, open PR against `dev`, do not merge.** List every paper
+  added (and every slot you could NOT fill with a real source, if any) in the
+  PR description so the Lead can review the actual list before merging.
+
