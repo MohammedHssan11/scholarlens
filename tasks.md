@@ -1432,3 +1432,77 @@ review was made. Those issue #9 responsibilities remain with Mariam Eladawy.
 - The GitHub connector returned `403 Resource not accessible by integration` for both
   writes; authenticated `gh` CLI was used as the documented fallback.
 - No merge into `dev` or `main` was performed.
+
+---
+
+## Phase 5 — Finish Doodiiii's branch directly (Lead-authorized, replaces her personal scope on issue #5)
+
+Mohammed Hassan Mahmoud is taking this over explicitly because `feat/frontend-ui` /
+PR #1 has been the single longest-standing blocker on the whole project and
+issue #5 has sat unaddressed. This is the same kind of explicit Lead
+reassignment as Phase 4 was for Mariam's corpus task — **not** a decision
+you're making on your own. Every other phase's ground rules and hard rules
+still apply in full, including no fabrication and no merging.
+
+The one rule from earlier phases that is explicitly relaxed for this phase
+only: you may edit files under `src/components/scholarlens/`,
+`src/app/scholarlens/`, and `src/components/common/` — the frontend files
+that were off-limits before. Nothing outside the frontend/UI layer.
+
+- [ ] **5.0 — Safety check before touching anything.** Fetch
+  `feat/frontend-ui` fresh and check whether Doodiiii has pushed any new
+  commits since the branch was last audited (commit `5650ad4`). If she has,
+  **stop and escalate instead of overwriting her new work** — read what she
+  changed first and report it, don't just plow ahead.
+
+- [ ] **5.1 — Retarget PR #1 from `main` to `dev`.** Use
+  `gh pr edit 1 --base dev`. This alone does not require code changes.
+
+- [ ] **5.2 — Fix the 2 lint errors in `InputForm.tsx`** (the `any` casts
+  around lines 43-44) with a proper type guard, same pattern already used
+  elsewhere in this codebase (see `route.ts`'s error handling for the style).
+
+- [ ] **5.3 — Build a real paper-selection UI.** `GET /api/scholarlens`
+  already returns `corpus.paper_ids`. Fetch it and render a real
+  multi-select (checkboxes or similar) instead of the hardcoded
+  `paper_ids: ["paper-001"]`. If you judge that showing paper titles
+  (not just IDs) is needed for a usable UI, you may extend the existing
+  `GET /api/scholarlens` handler in `route.ts` to also return each paper's
+  `title` from the manifest — this is a minimal, read-only addition to data
+  that's already loaded server-side, not a new endpoint or contract change.
+  If you do this, note it clearly in your report; it's a narrow exception
+  to "frontend files only," justified because it's the smallest way to get
+  real title text into the picker without inventing anything.
+
+- [ ] **5.4 — Build UI for `compare` and `readiness`.** Both actions
+  already work against the real backend (verified in Phase 4). Add a way to
+  select 2+ papers and either compare them (render the real matrix: title,
+  key_finding, agreement, disagreement per paper) or check readiness
+  (render `ready`, `gaps`, `papers_used` from the real response). Add a
+  simple export of the result (e.g. download the real response as JSON) —
+  this satisfies the "export" requirement from the product brief without
+  inventing new backend behavior.
+
+- [ ] **5.5 — Keep every state machine guarantee that already existed** on
+  this branch: idle, loading, success, empty, validation-error,
+  provider-error, retry. Don't regress any of it while adding the new UI.
+
+- [ ] **5.6 — Full verification pass.** All four checks
+  (`npm run lint`, `npx tsc --noEmit`, `npm run build`, `npx vitest run`)
+  clean, real output pasted. Then live-verify through the actual rendered
+  UI (not direct API calls this time — that's the whole point of this
+  phase): select 3 real papers, ask a real question, see a real answer
+  render; run a real comparison across those 3 papers and see the matrix
+  render; run readiness and see the real result render. This is the actual
+  "researcher asks 3 questions and compares 3 papers" success test the
+  whole project has been building toward — run it for real, through the
+  UI, and record exactly what you saw (screenshots or equivalent recorded
+  evidence), not just that it "should work."
+
+- [ ] **5.7 — Push directly to `feat/frontend-ui`, update PR #1's
+  description honestly** (what changed, how it was verified), do not open
+  a competing PR. Do not merge. Report back with the same
+  WHAT I WAS DOING / EXPECTED / ACTUALLY HAPPENED / ALREADY TRIED /
+  RECOMMEND format as every other phase, and explicitly note that these
+  commits were made under the Lead's direct authorization on Doodiiii's
+  branch, not as an unrelated party editing someone else's PR unprompted.
