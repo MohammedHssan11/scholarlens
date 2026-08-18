@@ -16,7 +16,7 @@ export default function EvidencePanel({ item }: { item: EvidenceItem }) {
 
   return (
     <article
-      className="animate-fade-slide-in max-w-full overflow-hidden rounded-2xl border border-slate-800
+      className="animate-fade-slide-in max-w-full overflow-hidden rounded-lg border border-slate-800
       bg-slate-900 p-5 shadow-[0_1px_2px_rgba(0,0,0,0.3),0_6px_20px_rgba(0,0,0,0.35)]
       transition-shadow duration-200 hover:border-slate-700 hover:shadow-[0_2px_4px_rgba(0,0,0,0.4),0_18px_36px_rgba(0,0,0,0.5)] sm:p-6"
     >
@@ -25,7 +25,7 @@ export default function EvidencePanel({ item }: { item: EvidenceItem }) {
         <h3 className="text-lg font-semibold leading-snug tracking-tight text-slate-50 break-words">
           {item.title}
         </h3>
-        <span className="flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full bg-slate-800 px-3 py-1 text-xs font-medium text-slate-300">
+        <span className="flex shrink-0 items-center gap-1.5 whitespace-nowrap text-xs font-medium text-slate-300">
           <span className={`h-1.5 w-1.5 rounded-full ${dotColor}`} aria-hidden="true" />
           {item.confidence}
         </span>

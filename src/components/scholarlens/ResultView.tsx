@@ -8,9 +8,8 @@ import EvidencePanel from "./EvidencePanel";
 export default function ResultView({ data }: { data: ScholarLensResponse }) {
   if (data.not_found) {
     return (
-      <div className="animate-fade-slide-in rounded-2xl border border-amber-900/50 bg-amber-500/10 px-6 py-5">
+      <div className="animate-fade-slide-in rounded-lg border border-amber-900/50 bg-amber-500/10 px-6 py-5">
         <div className="flex items-start gap-3">
-          <span className="mt-0.5 text-xl" aria-hidden="true">⚠️</span>
           <div>
             <p className="font-semibold text-amber-300">No evidence found</p>
             <p className="mt-1 text-sm leading-relaxed text-amber-200/90">
@@ -26,9 +25,8 @@ export default function ResultView({ data }: { data: ScholarLensResponse }) {
 
   if (evidence.length === 0) {
     return (
-      <div className="animate-fade-slide-in rounded-2xl border-2 border-dashed border-slate-700 bg-slate-900/60 px-6 py-10 text-center">
-        <p className="text-2xl" aria-hidden="true">🔍</p>
-        <p className="mt-2 font-semibold text-slate-100">No results to show</p>
+      <div className="animate-fade-slide-in rounded-lg border border-dashed border-slate-700 bg-slate-900/60 px-6 py-10 text-center">
+        <p className="font-semibold text-slate-100">No results to show</p>
         <p className="mt-1 text-sm text-slate-400">
           Try rephrasing your question or asking about a different topic.
         </p>
@@ -44,7 +42,7 @@ export default function ResultView({ data }: { data: ScholarLensResponse }) {
         </h2>
         <span className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-500">
           <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" aria-hidden="true" />
-          From approved sources
+          {data.provider_used ? `${data.provider_used} / approved sources` : "Approved sources"}
         </span>
       </div>
       <div className="mt-4 flex flex-col gap-4">

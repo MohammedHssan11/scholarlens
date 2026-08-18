@@ -2,8 +2,8 @@ import InputForm from "@/components/scholarlens/InputForm";
 
 export default function ScholarLensPage() {
   return (
-    <main className="mx-auto max-w-3xl px-6 py-16">
-      <header className="mb-10">
+    <main className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-12">
+      <header className="mb-8">
         <div className="flex items-center gap-2.5">
           <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-500 shadow-[0_0_20px_rgba(99,102,241,0.35)]">
             <svg
@@ -21,12 +21,12 @@ export default function ScholarLensPage() {
               />
             </svg>
           </span>
-          <h1 className="text-3xl font-bold tracking-tight text-slate-50">
+          <h1 className="text-3xl font-bold text-slate-50">
             Scholar<span className="text-indigo-400">Lens</span>
           </h1>
         </div>
         <p className="mt-2 text-slate-400">
-          Research Evidence Navigator — Team 01 baseline
+          Research Evidence Navigator
         </p>
 
         <div className="mt-5 flex items-start gap-3 rounded-lg border border-emerald-900/60 border-l-4 border-l-emerald-500 bg-emerald-500/10 px-4 py-3">

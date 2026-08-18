@@ -6,7 +6,7 @@ export default function ErrorState({
   onRetry?: () => void;
 }) {
   return (
-    <div role="alert" className="rounded-lg border border-red-900/50 bg-red-500/10 px-4 py-4">
+    <div role="alert" className="rounded-lg border border-red-900/50 bg-red-500/10 px-5 py-4">
       <p className="font-semibold text-red-300">Something went wrong</p>
       <p className="mt-1 text-sm text-red-200/90">{message}</p>
       {onRetry && (

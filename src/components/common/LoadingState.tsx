@@ -1,11 +1,11 @@
-export default function LoadingState() {
+export default function LoadingState({ label = "Searching the approved papers" }: { label?: string }) {
   return (
     <div role="status" aria-live="polite" className="flex flex-col gap-4">
-      <span className="sr-only">Searching the approved papers…</span>
+      <span className="sr-only">{label}</span>
       {[0, 1].map((i) => (
         <div
           key={i}
-          className="animate-skeleton rounded-2xl border border-slate-800 bg-slate-900 p-5 sm:p-6"
+          className="animate-skeleton rounded-lg border border-slate-800 bg-slate-900 p-5 sm:p-6"
           aria-hidden="true"
         >
           <div className="flex items-start justify-between gap-4">
