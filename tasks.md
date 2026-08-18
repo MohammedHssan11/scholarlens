@@ -1637,3 +1637,69 @@ build above remained clean.
   evidence, and the explicit one-time Lead authorization for these commits.
 - No competing branch or PR was opened, and no merge into `dev` or `main` was
   performed. The merge decision remains with Mohammed Hassan Mahmoud.
+
+---
+
+## Phase 6 — Fix the production 500 on Vercel
+
+Context: `dev` was promoted to `main` (PR #18, merged 2026-08-18) and Vercel
+auto-deployed from `main`. The build succeeded, but every request to
+`https://scholarlens-nine.vercel.app` (including `GET /api/scholarlens`)
+returns a raw Vercel 500 (`x-matched-path: /500`), not one of the app's own
+clean JSON error responses. This means the request is crashing with an
+unhandled exception somewhere, not hitting a normal error path.
+
+Working hypothesis (not confirmed — verify before fixing): Vercel's build
+command is the plain Next.js default. It never runs `npm run fetch-corpus`
+(the Python script), so `data/corpus/` in production likely has only
+`manifest.json` and `README.md`, no real paper content — a more extreme
+version of the "corpus not ready" case, and something in that code path is
+throwing instead of returning the existing clean 503 `CORPUS_UNAVAILABLE`
+response.
+
+- [ ] **6.0 — Get the real error before fixing anything.** Check if the
+  Vercel CLI is available (`vercel --version`); if authenticated, use
+  `vercel logs <deployment-url>` or `vercel inspect` to get the actual
+  runtime stack trace for the crash. If it requires login/a token you don't
+  have, do not ask the Lead to hand you a Vercel token or paste credentials
+  — that's the same category as API keys, off-limits. If you can't get real
+  logs this way, fall back to careful code reading of the request path
+  (`route.ts` → `agent-rag.ts`'s manifest/corpus loading) to find exactly
+  where a missing-files case isn't caught, and say plainly that this part is
+  inferred from code reading, not confirmed from a real trace.
+
+- [ ] **6.1 — Make the corpus-loading path crash-proof.** Wherever the real
+  cause turns out to be, the fix must ensure a missing or incomplete corpus
+  (manifest present but referenced files absent, or manifest itself absent)
+  always produces the existing clean JSON error contract (503
+  `CORPUS_UNAVAILABLE` or equivalent), never an unhandled exception. This
+  applies regardless of what's causing today's specific crash — it's a real
+  robustness gap either way.
+
+- [ ] **6.2 — Decide and implement how real corpus content reaches
+  production.** This is the actual root cause to fix, not just paper over.
+  Investigate options and pick the most reliable one, explaining why:
+  - Add a `vercel.json` with a custom `buildCommand` that runs
+    `npm run fetch-corpus && npm run build` — verify Python is actually
+    available in Vercel's build image before relying on this.
+  - Or: port `download_papers.py`'s logic to a Node/TypeScript script so the
+    fetch step has no Python dependency at all and can run as a normal
+    prebuild npm script Vercel already executes.
+  - Do not invent a third option that skips real verification (e.g. do not
+    commit the PDFs to git — that's still against the "never commit
+    copyrighted PDFs" rule from earlier phases).
+
+- [ ] **6.3 — Full verification pass, including a real deployed check.**
+  All four local checks clean as always. Then, after pushing and once a new
+  preview/production deployment completes, hit the real deployed URL's
+  `GET /api/scholarlens` and at least one real `ask` request, and confirm
+  real success — not just that the build succeeded. A green build is not
+  sufficient evidence for this phase; a working live response is.
+
+- [ ] **6.4 — Push, open PR against `dev`, do not merge.** Explain in the
+  PR description exactly what the real root cause was (from 6.0), what was
+  changed, and the live-deployed evidence from 6.3. As always: no merge into
+  `dev` or `main`, report back for the Lead's decision. Note explicitly that
+  merging into `dev` alone will not fix production — production only
+  updates from `main`, so the Lead will need a second promotion afterward,
+  same as PR #18.
