@@ -22,6 +22,21 @@
       "title": "A Systematic Review of Key Retrieval-Augmented Generation (RAG) Systems"
     },
     {
+      "source_id": "paper-005",
+      "content_path": "paper-005.pdf",
+      "title": "Towards Agentic RAG with Deep Reasoning: A Survey of RAG-Reasoning Systems in LLMs"
+    },
+    {
+      "source_id": "paper-006",
+      "content_path": "paper-006.pdf",
+      "title": "CollEX -- A Multimodal Agentic RAG System Enabling Interactive Exploration of Scientific Collections"
+    },
+    {
+      "source_id": "paper-007",
+      "content_path": "paper-007.pdf",
+      "title": "Open-Source Agentic Hybrid RAG Framework for Scientific Literature Review"
+    },
+    {
       "source_id": "paper-008",
       "content_path": "paper-008.pdf",
       "title": "Ask in Any Modality: A Comprehensive Survey on Multimodal Retrieval-Augmented Generation"
@@ -30,6 +45,11 @@
       "source_id": "paper-009",
       "content_path": "paper-009.pdf",
       "title": "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks"
+    },
+    {
+      "source_id": "paper-010",
+      "content_path": "paper-010.pdf",
+      "title": "From Local to Global: A Graph RAG Approach to Query-Focused Summarization"
     }
   ]
 }

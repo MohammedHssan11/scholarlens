@@ -9,12 +9,12 @@ This document maps common research questions to the most appropriate approved pa
 | Question Category | Primary Source(s) | Notes |
 |-------------------|-------------------|-------|
 | What is Agentic RAG? | paper-001 | Primary overview of Agentic RAG concepts and architecture. |
-| How does Agentic RAG improve RAG? | paper-005 | Explains autonomous planning and reasoning improvements. |
-| Reasoning strategies | paper-002 | Covers System 1 and System 2 reasoning. |
+| How does Agentic RAG improve RAG? | paper-001, paper-005 | Covers agentic architectures and retrieval-reasoning integration. |
+| Reasoning strategies | paper-002, paper-005 | Covers System 1 / System 2 reasoning and deep RAG-reasoning systems. |
 | Research gaps | paper-004 | Primary source for limitations and future work. |
 | Traditional RAG | paper-009 | Foundational RAG paper. |
-| GraphRAG | paper-007, paper-010 | Graph-based retrieval and GraphRAG implementation. |
-| Multimodal Agentic RAG | paper-006 | Multimodal Agentic RAG survey. |
+| GraphRAG and hybrid retrieval | paper-007, paper-010 | Covers agent-directed GraphRAG/VectorRAG selection and global GraphRAG summarization. |
+| Multimodal Agentic RAG | paper-006 | Covers multimodal agents for interactive scientific-collection exploration. |
 | Multimodal RAG | paper-008 | General multimodal RAG background. |
 
 ---

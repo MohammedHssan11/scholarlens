@@ -18,8 +18,12 @@ DOWNLOAD_URLS = {
     "paper-002": "https://arxiv.org/pdf/2506.10408.pdf",
     "paper-003": "https://arxiv.org/pdf/2506.00054.pdf",
     "paper-004": "https://arxiv.org/pdf/2507.18910.pdf",
+    "paper-005": "https://arxiv.org/pdf/2507.09477.pdf",
+    "paper-006": "https://arxiv.org/pdf/2504.07643.pdf",
+    "paper-007": "https://arxiv.org/pdf/2508.05660.pdf",
     "paper-008": "https://arxiv.org/pdf/2502.08826.pdf",
     "paper-009": "https://arxiv.org/pdf/2005.11401.pdf",
+    "paper-010": "https://arxiv.org/pdf/2404.16130.pdf",
 }
 
 

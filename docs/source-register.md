@@ -19,12 +19,12 @@ The following papers form the initial trusted knowledge corpus for ScholarLens. 
 | paper-002 | Reasoning RAG via System 1 or System 2: A Survey on Reasoning Agentic Retrieval-Augmented Generation for Industry Challenges | **Jintao Liang et al.** | 2025 | arXiv:2506.10408 | 28 Jul 2026 | arXiv licence (verification required before distribution) | Mohammed Hassan Mahmoud |
 | paper-003 | Retrieval-Augmented Generation: A Comprehensive Survey of Architectures, Enhancements, and Robustness Frontiers | **Chaitanya Sharma** | 2025 | arXiv:2506.00054 | 28 Jul 2026 | arXiv licence (verification required before distribution) | Mohammed Hassan Mahmoud |
 | paper-004 | A Systematic Review of Key Retrieval-Augmented Generation (RAG) Systems: Progress, Gaps, and Future Directions | **Agada Joseph Oche et al.** | 2025 | arXiv:2507.18910 | 28 Jul 2026 | arXiv licence (verification required before distribution) | Mohammed Hassan Mahmoud |
-| paper-005 | Agentic Retrieval-Augmented Generation: Advancing AI-Driven Information Retrieval and Processing | **Abhai Pratap Singh et al.** | 2025 | Official publication URL / DOI (to be confirmed) | 28 Jul 2026 | Licence to be verified | Mohammed Hassan Mahmoud |
-| paper-006 | MMA-RAG: A Survey on Multimodal Agentic Retrieval-Augmented Generation | **Vladana Perlić et al.** | 2025 | Official publication URL / DOI (to be confirmed) | 28 Jul 2026 | Licence to be verified | Mohammed Hassan Mahmoud |
-| paper-007 | Graph-Based Agentic Retrieval-Augmented Generation: A Comprehensive Survey | **Akansha Singh & Raviteja Bommireddy** | 2025 | Official publication URL / DOI (to be confirmed) | 28 Jul 2026 | Licence to be verified | Mohammed Hassan Mahmoud |
+| paper-005 | Towards Agentic RAG with Deep Reasoning: A Survey of RAG-Reasoning Systems in LLMs | **Yangning Li et al.** | 2025 | arXiv:2507.09477 | 18 Aug 2026 | Licence verification pending | Mohammed Hassan Mahmoud |
+| paper-006 | CollEX -- A Multimodal Agentic RAG System Enabling Interactive Exploration of Scientific Collections | **Florian Schneider, Narges Baba Ahmadi, Niloufar Baba Ahmadi, Iris Vogel, Martin Semmann & Chris Biemann** | 2025 | arXiv:2504.07643 | 18 Aug 2026 | Licence verification pending | Mohammed Hassan Mahmoud |
+| paper-007 | Open-Source Agentic Hybrid RAG Framework for Scientific Literature Review | **Aditya Nagori, Ricardo Accorsi Casonatto, Ayush Gautam, Abhinav Manikantha Sai Cheruvu & Rishikesan Kamaleswaran** | 2025 | arXiv:2508.05660 | 18 Aug 2026 | Licence verification pending | Mohammed Hassan Mahmoud |
 | paper-008 | Ask in Any Modality: A Comprehensive Survey on Multimodal Retrieval-Augmented Generation | **Mohammad Mahdi Abootorabi et al.** | 2025 | arXiv:2502.08826 | 28 Jul 2026 | arXiv licence (verification required before distribution) | Mohammed Hassan Mahmoud |
 | paper-009 | Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks | **Patrick Lewis et al.** | 2020 | arXiv:2005.11401 | 28 Jul 2026 | arXiv licence (verification required before distribution) | Mohammed Hassan Mahmoud |
-| paper-010 | From Local to Global: A GraphRAG Approach to Query-Focused Summarization | **Darren Edge et al.** | 2024 | Official publication URL / DOI (to be confirmed) | 28 Jul 2026 | Licence to be verified | Mohammed Hassan Mahmoud |
+| paper-010 | From Local to Global: A Graph RAG Approach to Query-Focused Summarization | **Darren Edge et al.** | 2024 | arXiv:2404.16130 | 18 Aug 2026 | Licence verification pending | Mohammed Hassan Mahmoud |
 
 ---
 
@@ -87,25 +87,25 @@ The current corpus does not cover:
 
 ### paper-005
 
-**Primary contribution:** Explains how Agentic RAG extends traditional RAG through autonomous planning, reasoning, and retrieval.
+**Primary contribution:** Surveys reasoning-enhanced RAG, RAG-enhanced reasoning, and agentic systems that interleave retrieval with multi-step reasoning.
 
-**Intended use:** Reference for explaining Agentic RAG capabilities and improvements over traditional RAG.
+**Intended use:** Reference for deep-reasoning workflows and the interaction between retrieval and agentic reasoning.
 
 ---
 
 ### paper-006
 
-**Primary contribution:** Surveys multimodal Agentic RAG systems that combine text, images, and additional data modalities.
+**Primary contribution:** Presents CollEX, a multimodal Agentic RAG system that uses vision-language agents and tools to explore scientific collections.
 
-**Intended use:** Reference for multimodal Agentic RAG retrieval and reasoning.
+**Intended use:** Reference for multimodal Agentic RAG interfaces, agent specialization, and scientific-collection exploration.
 
 ---
 
 ### paper-007
 
-**Primary contribution:** Reviews graph-based Agentic RAG methods and knowledge graph integration.
+**Primary contribution:** Presents an autonomous hybrid RAG framework that selects between GraphRAG and VectorRAG and reports uncertainty for scientific literature review.
 
-**Intended use:** Primary reference for GraphRAG concepts and graph-based retrieval workflows.
+**Intended use:** Reference for agent-controlled hybrid retrieval, GraphRAG/VectorRAG routing, and uncertainty-aware research workflows.
 
 ---
 
@@ -127,7 +127,7 @@ The current corpus does not cover:
 
 ### paper-010
 
-**Primary contribution:** Presents the GraphRAG framework for query-focused summarisation using graph-based retrieval.
+**Primary contribution:** Presents GraphRAG for global query-focused summarization using an entity graph, community detection, and community summaries.
 
 **Intended use:** Reference for GraphRAG workflows and comparisons with Agentic RAG.
 
@@ -144,4 +144,4 @@ The current corpus does not cover:
 - ⏳ Licence verification completed.
 - ✅ Final knowledge corpus approved by the project lead.
 
-**Review status:** Topic and sources approved by **Mohammed Hassan Mahmoud** (4 Aug 2026). Author metadata has been verified. Licence verification for papers **001–008** and publication URL/DOI verification for papers **005–007** and **010** remain open before production release.
+**Review status:** Topic and sources approved by **Mohammed Hassan Mahmoud**. On 18 Aug 2026, the Phase 4 replacement rows **005–007** and **010** were verified against arXiv's public API and real fetchable PDF text. Their licence status is not determined here; distribution verification remains open before production release.

@@ -1246,7 +1246,7 @@ own. Everything else in issue #9 (evaluation-case reconciliation, licence
 verification for the existing 6 papers) still belongs to her; do not touch those
 files beyond what's needed to add the new papers consistently.
 
-- [ ] **4.1 — Search for real replacement content for the 4 excluded slots first.**
+- [x] **4.1 — Search for real replacement content for the 4 excluded slots first.**
   The corpus was originally meant to have `paper-005`, `paper-006`, `paper-007`,
   `paper-010` with these working titles (from the pre-exclusion source register):
   - paper-005: "Agentic Retrieval-Augmented Generation: Advancing AI-Driven
@@ -1265,13 +1265,13 @@ files beyond what's needed to add the new papers consistently.
   the PDF/abstract text. Do not force a match — if a title doesn't correspond
   to any real paper you can verify, treat that slot as open for 4.2 instead.
 
-- [ ] **4.2 — For any slot that can't be matched, search more broadly.**
+- [x] **4.2 — For any slot that can't be matched, search more broadly.**
   Search arXiv for other real, on-topic papers in the Agentic RAG / RAG-agent
   domain (similar to the 6 already-active papers) to fill the remaining slots.
   It is fine to end up with fewer than 4 if you cannot verify enough real
   papers — report the real count, do not pad it.
 
-- [ ] **4.3 — For every paper you add, all of this must be real and verified,
+- [x] **4.3 — For every paper you add, all of this must be real and verified,
   never invented:**
   - Real arXiv ID, title, author(s), and year, confirmed from the actual API
     response.
@@ -1284,7 +1284,7 @@ files beyond what's needed to add the new papers consistently.
     the full list to the Lead for a final look in the PR description before
     assuming it's final.
 
-- [ ] **4.4 — Keep Mariam's other files consistent, but don't do her review
+- [x] **4.4 — Keep Mariam's other files consistent, but don't do her review
   work for her.** Update `knowledge/scholarlens/corpus-index.md` and
   `source-mapping.md` to list the new papers factually (title, topic) — do
   not write new evaluation cases, taxonomy examples, or licence
@@ -1292,13 +1292,143 @@ files beyond what's needed to add the new papers consistently.
   exactly which papers were added so she can fold them into her own
   reconciliation work rather than duplicate it.
 
-- [ ] **4.5 — Full verification pass + live check.** All four checks clean,
+- [x] **4.5 — Full verification pass + live check.** All four checks clean,
   then live-verify `GET /api/scholarlens` reports the new, real paper_count,
   and run at least one real `ask` against one of the newly added papers to
   confirm retrieval + evidence verification works on it, the same way it was
   verified on the original 6.
 
-- [ ] **4.6 — Push, open PR against `dev`, do not merge.** List every paper
+- [x] **4.6 — Push, open PR against `dev`, do not merge.** List every paper
   added (and every slot you could NOT fill with a real source, if any) in the
   PR description so the Lead can review the actual list before merging.
 
+---
+
+### 2026-08-18 — Phase 4.1–4.5 verified corpus expansion
+
+The arXiv public API was queried directly. Exact-title searches returned zero results
+for the old working titles in slots 005, 006, and 007, so those slots proceeded to the
+broader on-topic search required by 4.2. The paper-010 search returned one matching
+record after using arXiv's real title spelling, `Graph RAG`: arXiv `2404.16130`.
+
+The final API-verified replacements are:
+
+| Slot | arXiv ID | API title | API author evidence | Year |
+|---|---|---|---|---:|
+| paper-005 | 2507.09477 | Towards Agentic RAG with Deep Reasoning: A Survey of RAG-Reasoning Systems in LLMs | Yangning Li et al. (20 API-listed authors) | 2025 |
+| paper-006 | 2504.07643 | CollEX -- A Multimodal Agentic RAG System Enabling Interactive Exploration of Scientific Collections | Florian Schneider, Narges Baba Ahmadi, Niloufar Baba Ahmadi, Iris Vogel, Martin Semmann, Chris Biemann | 2025 |
+| paper-007 | 2508.05660 | Open-Source Agentic Hybrid RAG Framework for Scientific Literature Review | Aditya Nagori, Ricardo Accorsi Casonatto, Ayush Gautam, Abhinav Manikantha Sai Cheruvu, Rishikesan Kamaleswaran | 2025 |
+| paper-010 | 2404.16130 | From Local to Global: A Graph RAG Approach to Query-Focused Summarization | Darren Edge et al. (10 API-listed authors) | 2024 |
+
+All four PDF URLs were fetched and parsed as real text. The project-downloaded copies
+produced:
+
+```text
+paper-005_BYTES=1033383
+paper-005_TEXT_CHARS=121548
+paper-006_BYTES=8631968
+paper-006_TEXT_CHARS=51026
+paper-007_BYTES=1124477
+paper-007_TEXT_CHARS=56584
+paper-010_BYTES=6893854
+paper-010_TEXT_CHARS=89975
+```
+
+`npm run fetch-corpus` exited 0 and ended with:
+
+```text
+Downloading paper-010 to C:\Users\mh978\Downloads\scholarlens-app\data\corpus\paper-010.pdf...
+Downloaded 10 approved papers to C:\Users\mh978\Downloads\scholarlens-app\data\corpus.
+```
+
+All four required checks were run from the repository root.
+
+`npm run lint` (exit 0):
+
+```text
+> scholarlens-app@0.1.0 lint
+> eslint
+```
+
+`npx tsc --noEmit` (exit 0):
+
+```text
+```
+
+`npm run build` (exit 0):
+
+```text
+> scholarlens-app@0.1.0 build
+> next build
+
+▲ Next.js 16.2.11 (Turbopack)
+- Environments: .env.local
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 4.8s
+  Running TypeScript ...
+  Finished TypeScript in 2.7s ...
+  Collecting page data using 7 workers ...
+✓ Generating static pages using 7 workers (6/6) in 641ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ƒ /api/scholarlens
+└ ○ /scholarlens
+```
+
+`npx vitest run` (exit 0):
+
+```text
+RUN  v4.1.10 C:/Users/mh978/Downloads/scholarlens-app
+
+Test Files  8 passed (8)
+     Tests  82 passed (82)
+  Duration  962ms
+```
+
+The live health check returned HTTP 200 with all ten papers available and no unavailable
+IDs:
+
+```json
+{"status":"ok","corpus":{"paper_count":10,"paper_ids":["paper-001","paper-002","paper-003","paper-004","paper-005","paper-006","paper-007","paper-008","paper-009","paper-010"],"unavailable_paper_ids":[]},"providers":{"groq":true,"gemini":true}}
+```
+
+A first live ask against paper-006 retrieved eight real chunks, then correctly discarded
+a provider snippet that was not verbatim in the retrieved text and returned a safe
+`not_found` response. A second live ask provided the required positive evidence-verifier
+check against new paper-010:
+
+```text
+REQUEST={"paper_ids":["paper-010"],"question":"What approach does this paper propose for global query-focused summarization?","action":"ask"}
+HTTP_STATUS=200
+RESPONSE={"question":"What approach does this paper propose for global query-focused summarization?","not_found":false,"evidence":[{"question":"What approach does this paper propose for global query-focused summarization?","source_id":"paper-010","title":"From Local to Global: A Graph RAG Approach to Query-Focused Summarization","key_finding":"The paper proposes GraphRAG, a graph‑based Retrieval‑Augmented Generation approach that builds a knowledge graph and generates community summaries to enable query‑focused summarization over the entire corpus.","evidence_snippet":"we propose GraphRAG, a graph-based approach to question answering over private text corpora that scales with both the generality of user questions and the quantity of source text.","agreement":"N/A","disagreement":"N/A","research_gap":"The evaluation is limited to two corpora of about 1 million tokens each, so broader generalization is not addressed.","limitation":"Current evaluation focuses on sensemaking questions for only two specific datasets; performance on other domains or larger scales is unknown.","confidence":"high"}],"provider_used":"groq"}
+```
+
+Server evidence for that successful ask:
+
+```text
+[AgentRAG] Retrieval: 1 papers, 102 chunks scanned, 41 above threshold, 8 returned, top=0.2094, 555ms
+[ScholarLens] Context retrieval: 8 chunks from 1 papers in 556ms
+[ScholarLens] ask: 1 evidence items via groq in 5786ms
+```
+
+No licence determination, evaluation-case change, taxonomy change, or existing-paper
+review was made. Those issue #9 responsibilities remain with Mariam Eladawy.
+
+### 2026-08-18 — Phase 4.6 PR opened; Lead merge decision required
+
+- Commit `5933e9b` (`feat: expand corpus with verified arxiv papers`) was pushed on
+  `codex/phase-4-corpus-expansion`.
+- Draft PR #14 was opened against `dev`:
+  https://github.com/MohammedHssan11/scholarlens/pull/14
+- The PR description lists all four verified additions and records that no target slot
+  remains empty. It requests Mohammed Hassan Mahmoud's final review of the actual paper
+  list before merge.
+- The required handoff was posted to Mariam Eladawy's issue #9:
+  https://github.com/MohammedHssan11/scholarlens/issues/9#issuecomment-5331300535
+- The GitHub connector returned `403 Resource not accessible by integration` for both
+  writes; authenticated `gh` CLI was used as the documented fallback.
+- No merge into `dev` or `main` was performed.
