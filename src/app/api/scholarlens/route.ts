@@ -151,6 +151,7 @@ export async function GET() {
       },
     }, { status: corpusReady ? 200 : 503 });
   } catch (error) {
+    console.error("[ScholarLens] Corpus health check failed:", redactSecrets(error));
     return NextResponse.json(
       {
         status: "error",
@@ -159,7 +160,8 @@ export async function GET() {
           groq: isProviderConfigured("groq"),
           gemini: isProviderConfigured("gemini"),
         },
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: "The approved paper corpus is not ready.",
+        code: "CORPUS_UNAVAILABLE",
       },
       { status: 503 },
     );
