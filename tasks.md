@@ -1657,7 +1657,7 @@ version of the "corpus not ready" case, and something in that code path is
 throwing instead of returning the existing clean 503 `CORPUS_UNAVAILABLE`
 response.
 
-- [ ] **6.0 — Get the real error before fixing anything.** Check if the
+- [x] **6.0 — Get the real error before fixing anything.** Check if the
   Vercel CLI is available (`vercel --version`); if authenticated, use
   `vercel logs <deployment-url>` or `vercel inspect` to get the actual
   runtime stack trace for the crash. If it requires login/a token you don't
@@ -1668,7 +1668,7 @@ response.
   where a missing-files case isn't caught, and say plainly that this part is
   inferred from code reading, not confirmed from a real trace.
 
-- [ ] **6.1 — Make the corpus-loading path crash-proof.** Wherever the real
+- [x] **6.1 — Make the corpus-loading path crash-proof.** Wherever the real
   cause turns out to be, the fix must ensure a missing or incomplete corpus
   (manifest present but referenced files absent, or manifest itself absent)
   always produces the existing clean JSON error contract (503
@@ -1676,7 +1676,7 @@ response.
   applies regardless of what's causing today's specific crash — it's a real
   robustness gap either way.
 
-- [ ] **6.2 — Decide and implement how real corpus content reaches
+- [x] **6.2 — Decide and implement how real corpus content reaches
   production.** This is the actual root cause to fix, not just paper over.
   Investigate options and pick the most reliable one, explaining why:
   - Add a `vercel.json` with a custom `buildCommand` that runs
@@ -1703,3 +1703,105 @@ response.
   merging into `dev` alone will not fix production — production only
   updates from `main`, so the Lead will need a second promotion afterward,
   same as PR #18.
+
+### 2026-08-19 — Phase 6.0 confirmed diagnosis; 6.1–6.2 implemented
+
+Authenticated Vercel CLI access was already legitimately available through the
+Lead's existing Vercel account session; no token, API key, or other credential
+was requested or exposed. `vercel inspect` identified production deployment
+`dpl_HQ356hojRxeZzMLUSDeBeGLEB9ZY`. Runtime logs for real GET and POST failures
+showed the same module-load crash before either handler ran:
+
+```text
+Failed to load external module pdf-parse-08f4573089f02674:
+ReferenceError: DOMMatrix is not defined
+Cannot load "@napi-rs/canvas" package: Error: Cannot find module '@napi-rs/canvas'
+```
+
+Therefore the confirmed cause of the raw Vercel 500 was the top-level
+`pdf-parse` import in `agent-rag.ts`: the deployed function trace omitted the
+canvas worker dependency, PDF.js could not define `DOMMatrix`, and route-module
+evaluation failed before the app's catches existed. The Phase 6 missing-corpus
+hypothesis was not the cause of this raw 500. Separately, code/build inspection
+confirmed that the prior plain `next build` did not download the ignored PDFs,
+so production corpus delivery was still an independent gap that also required a
+fix.
+
+Implemented within Phase 6 scope:
+
+- Removed the top-level parser import. PDF retrieval now imports
+  `pdf-parse/worker` first and then `pdf-parse` inside the existing guarded
+  retrieval path. A parser/worker/file failure is consequently converted to
+  `CorpusUnavailableError` and the clean JSON 503 contract.
+- Replaced GET's exception-message echo with a stable, non-sensitive
+  `CORPUS_UNAVAILABLE` JSON 503 and added regressions for a thrown health check
+  and a manifest with an unavailable paper.
+- Chose the existing Python downloader over a Node port. Vercel's official
+  current build-image documentation lists Python 3.12 as installed, while the
+  existing script already owns the verified manifest-to-arXiv mapping,
+  traversal guard, partial-file cleanup, and failure exit status. Reusing it
+  avoids a second download implementation and source list that could drift.
+- Added `vercel.json` with
+  `npm run fetch-corpus && npm run build`, and added a route-specific
+  `outputFileTracingIncludes` entry for `data/corpus/**/*`. PDFs remain ignored
+  and uncommitted.
+
+The authenticated local `vercel build` wrapper selected that exact custom build
+command but failed before executing it with local Windows error
+`spawn cmd.exe ENOENT`. The same command was therefore run directly: the fetch
+downloaded all ten manifest papers and `next build` exited 0. The generated
+`route.js.nft.json` contained all ten PDF paths, `pdf-parse/worker`,
+`@napi-rs/canvas`, and the installed platform canvas binary.
+
+Fresh required local checks from the repository root:
+
+- `npm run lint` — exit 0.
+- `npx tsc --noEmit` — exit 0, no output.
+- `npm run build` — exit 0; Next.js 16.2.11 compiled successfully and emitted
+  `/api/scholarlens` as a dynamic route.
+- `npx vitest run` — exit 0; 8 files and 84 tests passed.
+
+A local production-server smoke test returned GET 200 with all ten paper IDs and
+no unavailable papers. The real `paper-010` GraphRAG question returned HTTP 200,
+one high-confidence verbatim evidence item, and `provider_used: groq`. These are
+local facts only: item 6.3 remains open until the Vercel deployment for this
+branch returns the same real GET and ask success.
+
+### 2026-08-19 — Phase 6.3 deployed preview blocked at provider configuration
+
+Implementation commit `dc00c75` was pushed to
+`codex/phase-6-vercel-fix`, and draft PR #20 was opened against `dev`:
+https://github.com/MohammedHssan11/scholarlens/pull/20. The GitHub connector
+returned `403 Resource not accessible by integration`; authenticated `gh` CLI
+was used as the documented fallback. No merge into `dev` or `main` was
+performed.
+
+Vercel built preview deployment `dpl_FVe9X2GrqePedWuJDD7htup5mjNJ` from that
+commit. Because Deployment Protection is enabled, direct anonymous fetches
+returned Vercel's login page; authenticated `vercel curl` supplied Vercel's own
+generated protection bypass without exposing or requesting a secret. The real
+deployed GET then returned `status: ok`, `paper_count: 10`, all ten manifest
+paper IDs, and `unavailable_paper_ids: []`.
+
+The preview reports `providers.groq: false` and `providers.gemini: false`. The
+required real `paper-010` ask reached the deployed parser and retrieval path,
+then returned the app's clean `PROVIDER_ERROR` rather than HTTP 200. Runtime
+logs prove the fixed native/PDF path executed successfully before that error:
+
+```text
+[AgentRAG] Retrieval: 1 papers, 102 chunks scanned, 41 above threshold,
+8 returned, top=0.2094, 523ms
+[ScholarLens] Context retrieval: 8 chunks from 1 papers in 523ms
+[ScholarLens] Groq not configured, trying Gemini directly.
+[ScholarLens] Gemini not configured.
+```
+
+This proves the deployed raw-500 defect and corpus-delivery defect are fixed,
+but it does not satisfy item 6.3's required successful deployed AI response.
+No production credential was copied into Preview, no Vercel environment setting
+was changed, and the feature branch was not deployed over production. Item 6.3
+and final completion of 6.4 remain open pending a Lead-owned decision: configure
+an AI provider for Vercel Preview and redeploy PR #20, or review/merge and
+promote through the normal `dev` then `main` path before the production smoke
+test. The second option still requires a second promotion to `main`; a merge to
+`dev` alone cannot update production.

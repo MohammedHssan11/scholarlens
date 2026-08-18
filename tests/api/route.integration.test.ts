@@ -16,7 +16,7 @@ import {
   handleReadiness,
 } from "../../src/lib/scholarlens/service";
 import { ProviderError } from "../../src/lib/ai/providers";
-import { CorpusUnavailableError } from "../../src/lib/scholarlens/agent-rag";
+import { agentRag, CorpusUnavailableError } from "../../src/lib/scholarlens/agent-rag";
 
 // Mock the service layer so we don't make real AI calls in route tests
 vi.mock("../../src/lib/scholarlens/service", async (importOriginal) => {
@@ -55,6 +55,56 @@ describe("API Route: GET /api/scholarlens", () => {
     expect(data.status).toBe("ok");
     expect(data.corpus).toBeDefined();
     expect(data.providers).toBeDefined();
+  });
+
+  it("returns a clean 503 when corpus health cannot be loaded", async () => {
+    const healthSpy = vi.spyOn(agentRag, "getCorpusHealth").mockRejectedValueOnce(
+      new CorpusUnavailableError("sensitive deployment path"),
+    );
+
+    const response = await GET();
+
+    expect(response.status).toBe(503);
+    await expect(response.json()).resolves.toMatchObject({
+      status: "error",
+      corpus: { paper_count: 0, paper_ids: [], papers: [] },
+      error: "The approved paper corpus is not ready.",
+      code: "CORPUS_UNAVAILABLE",
+    });
+    healthSpy.mockRestore();
+  });
+
+  it("returns a clean 503 when any manifest paper is unavailable", async () => {
+    const healthSpy = vi.spyOn(agentRag, "getCorpusHealth").mockResolvedValueOnce({
+      availablePaperIds: ["paper-001"],
+      unavailablePaperIds: ["paper-002"],
+    });
+    const metadataSpy = vi.spyOn(agentRag, "getPaperMetadata").mockResolvedValueOnce(
+      new Map([
+        [
+          "paper-001",
+          {
+            source_id: "paper-001",
+            title: "Available paper",
+            content_path: "paper-001.pdf",
+          },
+        ],
+      ]),
+    );
+
+    const response = await GET();
+
+    expect(response.status).toBe(503);
+    await expect(response.json()).resolves.toMatchObject({
+      status: "error",
+      corpus: {
+        paper_count: 1,
+        paper_ids: ["paper-001"],
+        unavailable_paper_ids: ["paper-002"],
+      },
+    });
+    healthSpy.mockRestore();
+    metadataSpy.mockRestore();
   });
 });
 
