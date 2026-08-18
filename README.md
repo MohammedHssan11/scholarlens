@@ -41,8 +41,14 @@ uploading confidential unpublished work without permission.
 ```bash
 npm install
 cp .env.example .env.local   # then fill in your keys
+npm run fetch-corpus         # requires Python 3 and downloads approved papers locally
 npm run dev
 ```
+
+`fetch-corpus` downloads the six active papers with confirmed arXiv identifiers into
+`data/corpus`. Those paper files are gitignored and must not be committed. To download
+into another directory, set `SCHOLARLENS_CORPUS_DIR` before running the command; the
+default is the repository-relative `data/corpus` directory.
 
 Open http://localhost:3000/scholarlens
 

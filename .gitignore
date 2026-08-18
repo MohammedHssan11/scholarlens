@@ -32,6 +32,7 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
 
 # vercel
 .vercel
@@ -44,8 +45,12 @@ next-env.d.ts
 # Approved research papers: never commit copyrighted PDFs to a public repo.
 data/corpus/*
 !data/corpus/README.md
+!data/corpus/manifest.json
 
 # Local env
 .env
 .env.local
 .env*.local
+
+# Git Credential Manager diagnostic logs
+gcm-diagnose.log

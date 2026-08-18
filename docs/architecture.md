@@ -13,7 +13,7 @@ Browser (UI)
    ▼
 Route handler  →  validation  →  service
                                    ├─→ providers.ts   (Groq → Gemini fallback)
-                                   ├─→ grounding      (Gemini File Search, approved corpus only)
+                                   ├─→ agent-rag.ts   (local TF-IDF, approved corpus only)
                                    └─→ tools.ts       (compare_papers, research_readiness)
    ▲
    │  structured answer + exact evidence snippet  (or not_found)
@@ -29,7 +29,7 @@ sent to the browser or included in the client bundle.
 
 | Layer | Files | Owner |
 |---|---|---|
-| UI / workflow | `src/app/scholarlens/`, `src/components/` | Mohammed |
+| UI / workflow | `src/app/scholarlens/`, `src/components/` | GitHub: Doodiiii (identity to be confirmed — see Team changes) |
 | API + validation | `src/app/api/scholarlens/route.ts`, `src/lib/scholarlens/schema.ts` | AlBaraa |
 | AI providers | `src/lib/ai/providers.ts` | AlBaraa |
 | Grounding / retrieval | `src/lib/scholarlens/service.ts` | AlBaraa |
@@ -42,19 +42,27 @@ sent to the browser or included in the client bundle.
 
 - **Ahmed Mossad Elgammal** (Evaluation & Production) withdrew. Work redistributed with
   Dr. Ahmed's approval.
-- **Mariam Ali Ahmed** (Product UI & Workflow) withdrew. The frontend and user-workflow
-  ownership moved to the Integration Lead.
+- **Mariam Ali Ahmed** (Product UI & Workflow) was recorded as withdrawn as of 2026-07-23.
+  This is now unclear: `feat/frontend-ui` has active, ongoing commits and an open PR,
+  all authored by GitHub account **Doodiiii** (`alidreasydody@gmail.com`) — an email that
+  doesn't match Mariam Ali's contact email on file. **Open action for the Lead:** confirm
+  whether Doodiiii is Mariam Ali, a new member, or someone else, and update this doc once
+  known.
 
-## Open decision
+## Approved retrieval decision
 
-> **Where are papers and chunks stored?** Gemini File Search store only, or also a
-> database for metadata? — to be decided by the Lead with AlBaraa.
+Mohammed Hassan Mahmoud approved the provider-neutral local TF-IDF retrieval strategy on
+2026-08-15. Approved PDFs are downloaded into the gitignored `data/corpus` directory by
+`npm run fetch-corpus`; metadata remains in the tracked manifest and source register.
+`agent-rag.ts` retrieves the same source-labelled chunks before either Groq or Gemini is
+called, so both generation providers use the same bounded evidence context. No Gemini
+File Search store or separate metadata database is used by the current prototype.
 
 ## External services (approved)
 
 | Service | Use |
 |---|---|
-| Gemini File Search | Grounded retrieval over the approved corpus |
-| Groq API | Fast generation (primary), Gemini as fallback |
+| Groq API | Primary structured evidence generation |
+| Gemini API | Fallback structured evidence generation |
 | Crossref REST API | DOI and publication metadata |
-| arXiv API | Paper metadata and abstracts |
+| arXiv | Confirmed paper downloads and metadata |
