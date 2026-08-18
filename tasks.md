@@ -1298,7 +1298,7 @@ files beyond what's needed to add the new papers consistently.
   confirm retrieval + evidence verification works on it, the same way it was
   verified on the original 6.
 
-- [ ] **4.6 — Push, open PR against `dev`, do not merge.** List every paper
+- [x] **4.6 — Push, open PR against `dev`, do not merge.** List every paper
   added (and every slot you could NOT fill with a real source, if any) in the
   PR description so the Lead can review the actual list before merging.
 
@@ -1417,3 +1417,18 @@ Server evidence for that successful ask:
 
 No licence determination, evaluation-case change, taxonomy change, or existing-paper
 review was made. Those issue #9 responsibilities remain with Mariam Eladawy.
+
+### 2026-08-18 — Phase 4.6 PR opened; Lead merge decision required
+
+- Commit `5933e9b` (`feat: expand corpus with verified arxiv papers`) was pushed on
+  `codex/phase-4-corpus-expansion`.
+- Draft PR #14 was opened against `dev`:
+  https://github.com/MohammedHssan11/scholarlens/pull/14
+- The PR description lists all four verified additions and records that no target slot
+  remains empty. It requests Mohammed Hassan Mahmoud's final review of the actual paper
+  list before merge.
+- The required handoff was posted to Mariam Eladawy's issue #9:
+  https://github.com/MohammedHssan11/scholarlens/issues/9#issuecomment-5331300535
+- The GitHub connector returned `403 Resource not accessible by integration` for both
+  writes; authenticated `gh` CLI was used as the documented fallback.
+- No merge into `dev` or `main` was performed.
