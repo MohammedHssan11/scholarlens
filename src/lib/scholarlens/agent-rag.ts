@@ -1,6 +1,5 @@
 import { readFile, stat } from "node:fs/promises";
 import path from "node:path";
-import { PDFParse } from "pdf-parse";
 import { z } from "zod";
 
 // ─── Corpus Manifest Schema ─────────────────────────────────────────────────
@@ -106,6 +105,19 @@ function queryTerms(question: string): string[] {
 function isWithinCorpus(filePath: string): boolean {
   const relative = path.relative(corpusDirectory, filePath);
   return relative !== "" && !relative.startsWith("..") && !path.isAbsolute(relative);
+}
+
+async function extractPdfText(buffer: Buffer): Promise<string> {
+  // pdf-parse's worker installs the canvas globals required by PDF.js on Vercel.
+  await import("pdf-parse/worker");
+  const { PDFParse } = await import("pdf-parse");
+  const parser = new PDFParse({ data: buffer });
+
+  try {
+    return (await parser.getText()).text;
+  } finally {
+    await parser.destroy();
+  }
 }
 
 // ─── Manifest Loading ────────────────────────────────────────────────────────
@@ -324,13 +336,7 @@ export class AgentRAG {
       try {
         if (paper.content_path.toLowerCase().endsWith(".pdf")) {
           const buffer = await readFile(documentPath);
-          const parser = new PDFParse({ data: buffer });
-          try {
-            const pdfData = await parser.getText();
-            text = pdfData.text;
-          } finally {
-            await parser.destroy();
-          }
+          text = await extractPdfText(buffer);
         } else {
           text = await readFile(documentPath, "utf8");
         }
