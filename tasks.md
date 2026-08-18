@@ -1449,20 +1449,20 @@ only: you may edit files under `src/components/scholarlens/`,
 `src/app/scholarlens/`, and `src/components/common/` — the frontend files
 that were off-limits before. Nothing outside the frontend/UI layer.
 
-- [ ] **5.0 — Safety check before touching anything.** Fetch
+- [x] **5.0 — Safety check before touching anything.** Fetch
   `feat/frontend-ui` fresh and check whether Doodiiii has pushed any new
   commits since the branch was last audited (commit `5650ad4`). If she has,
   **stop and escalate instead of overwriting her new work** — read what she
   changed first and report it, don't just plow ahead.
 
-- [ ] **5.1 — Retarget PR #1 from `main` to `dev`.** Use
+- [x] **5.1 — Retarget PR #1 from `main` to `dev`.** Use
   `gh pr edit 1 --base dev`. This alone does not require code changes.
 
-- [ ] **5.2 — Fix the 2 lint errors in `InputForm.tsx`** (the `any` casts
+- [x] **5.2 — Fix the 2 lint errors in `InputForm.tsx`** (the `any` casts
   around lines 43-44) with a proper type guard, same pattern already used
   elsewhere in this codebase (see `route.ts`'s error handling for the style).
 
-- [ ] **5.3 — Build a real paper-selection UI.** `GET /api/scholarlens`
+- [x] **5.3 — Build a real paper-selection UI.** `GET /api/scholarlens`
   already returns `corpus.paper_ids`. Fetch it and render a real
   multi-select (checkboxes or similar) instead of the hardcoded
   `paper_ids: ["paper-001"]`. If you judge that showing paper titles
@@ -1474,7 +1474,7 @@ that were off-limits before. Nothing outside the frontend/UI layer.
   to "frontend files only," justified because it's the smallest way to get
   real title text into the picker without inventing anything.
 
-- [ ] **5.4 — Build UI for `compare` and `readiness`.** Both actions
+- [x] **5.4 — Build UI for `compare` and `readiness`.** Both actions
   already work against the real backend (verified in Phase 4). Add a way to
   select 2+ papers and either compare them (render the real matrix: title,
   key_finding, agreement, disagreement per paper) or check readiness
@@ -1483,11 +1483,11 @@ that were off-limits before. Nothing outside the frontend/UI layer.
   this satisfies the "export" requirement from the product brief without
   inventing new backend behavior.
 
-- [ ] **5.5 — Keep every state machine guarantee that already existed** on
+- [x] **5.5 — Keep every state machine guarantee that already existed** on
   this branch: idle, loading, success, empty, validation-error,
   provider-error, retry. Don't regress any of it while adding the new UI.
 
-- [ ] **5.6 — Full verification pass.** All four checks
+- [x] **5.6 — Full verification pass.** All four checks
   (`npm run lint`, `npx tsc --noEmit`, `npm run build`, `npx vitest run`)
   clean, real output pasted. Then live-verify through the actual rendered
   UI (not direct API calls this time — that's the whole point of this
@@ -1499,10 +1499,141 @@ that were off-limits before. Nothing outside the frontend/UI layer.
   UI, and record exactly what you saw (screenshots or equivalent recorded
   evidence), not just that it "should work."
 
-- [ ] **5.7 — Push directly to `feat/frontend-ui`, update PR #1's
+- [x] **5.7 — Push directly to `feat/frontend-ui`, update PR #1's
   description honestly** (what changed, how it was verified), do not open
   a competing PR. Do not merge. Report back with the same
   WHAT I WAS DOING / EXPECTED / ACTUALLY HAPPENED / ALREADY TRIED /
   RECOMMEND format as every other phase, and explicitly note that these
   commits were made under the Lead's direct authorization on Doodiiii's
   branch, not as an unrelated party editing someone else's PR unprompted.
+
+### 2026-08-18 — Phase 5.0–5.6 implementation and rendered-UI verification
+
+This work was performed directly on `feat/frontend-ui` under Mohammed Hassan
+Mahmoud's explicit Lead authorization. Before any edit, `origin/feat/frontend-ui`
+was fetched and its tip was confirmed to be exactly
+`5650ad4dcaa835827a977f59bc109f928e0d3772`; no newer contributor work existed.
+PR #1 was then retargeted from `main` to `dev`, and current `origin/dev` was
+merged into the feature branch without conflicts. No merge into `dev` or `main`
+was performed.
+
+Implemented facts:
+
+- Replaced the two `any` casts in `InputForm.tsx` with unknown-input type guards
+  and Zod parsing of the three documented response shapes.
+- Replaced the hardcoded `paper-001` request with a live ten-paper multi-select
+  loaded from `GET /api/scholarlens`. The picker supports individual selection,
+  select all, clear, loading, load failure, and retry.
+- Used the explicit Phase 5.3 exception to add manifest-backed `source_id` and
+  `title` entries to the existing GET health response. No new endpoint or
+  invented title data was added.
+- Added Ask, Compare, and Readiness action controls; action-specific validation
+  and loading labels; real comparison and readiness result views; and JSON
+  export of the exact response object.
+- Preserved and rendered idle, loading, success, empty, validation-error,
+  provider-error, and retry states. A one-request browser interception supplied
+  a deliberate safe 504 only to exercise the provider-error UI; after that
+  interception expired, `Try again` repeated the exact request against the real
+  backend and the server completed it with HTTP 200 in 5.3 seconds.
+
+Fresh required checks from the repository root:
+
+`npm run lint` (exit 0):
+
+```text
+> scholarlens-app@0.1.0 lint
+> eslint
+```
+
+`npx tsc --noEmit` (exit 0): no output.
+
+`npm run build` (exit 0):
+
+```text
+> scholarlens-app@0.1.0 build
+> next build
+
+▲ Next.js 16.2.11 (Turbopack)
+- Environments: .env.local
+
+Creating an optimized production build ...
+✓ Compiled successfully in 3.0s
+Running TypeScript ...
+Finished TypeScript in 2.5s
+Collecting page data using 7 workers ...
+✓ Generating static pages using 7 workers (6/6) in 715ms
+Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ƒ /api/scholarlens
+└ ○ /scholarlens
+```
+
+`npx vitest run` (exit 0):
+
+```text
+RUN  v4.1.10 C:/Users/mh978/Downloads/scholarlens-app
+
+Test Files  8 passed (8)
+Tests  82 passed (82)
+Duration  1.21s
+```
+
+Rendered UI journey at `http://localhost:3000/scholarlens`:
+
+1. Selected `paper-001`, `paper-002`, and `paper-010`. Asked, "How does
+   agentic retrieval-augmented generation differ from conventional RAG?" The
+   UI rendered one high-confidence `paper-001` result from Groq with a literal
+   source snippet, a research gap, and a limitation.
+2. With the same three papers, asked, "When should a RAG system use System 2
+   reasoning instead of System 1 reasoning?" The real response rendered the
+   safe empty state: no supporting evidence found. Server logs showed the
+   proposed `paper-002` snippet was discarded because it was not verbatim in
+   retrieved text.
+3. With the same three papers, asked, "How does GraphRAG support global
+   query-focused summarization?" The UI rendered one high-confidence
+   `paper-010` result describing map-reduce over community summaries, with its
+   literal source snippet and limitation.
+4. Compared the same three selected papers with, "Compare how these papers
+   handle retrieval, reasoning, and evidence grounding." The real matrix
+   rendered title, key finding, agreement, and disagreement columns. The
+   backend response contained two evidence-backed rows (`paper-002` and
+   `paper-001`) and reported `paper_count: 2`; it did not fabricate a row for
+   selected `paper-010`. Additional honest attempts with other three-paper
+   selections returned one or two verified rows, never three. Thus the UI has
+   proved a comparison request across three selected papers and rendered the
+   real matrix, but a provider-verified three-row matrix was not observed.
+5. Selected `paper-001`, `paper-002`, and `paper-003` and ran readiness for,
+   "Is the selected evidence sufficient for a grounded comparison of agentic
+   RAG approaches?" The real result rendered `ready: false`, `papers_used: 0`,
+   missing source snippets, and no returned gaps after evidence verification
+   discarded the non-verbatim proposed snippet.
+6. Export from the readiness result downloaded the actual response as
+   `scholarlens-readiness-result.json`.
+
+Recorded screenshots are in the ignored local evidence directory:
+`output/playwright/phase5-initial-desktop.png`,
+`output/playwright/phase5-initial-mobile.png`,
+`output/playwright/phase5-ask-1-success.png`,
+`output/playwright/phase5-ask-2-empty.png`,
+`output/playwright/phase5-ask-3-success.png`,
+`output/playwright/phase5-compare-two-evidence-rows.png`, and
+`output/playwright/phase5-readiness-result.png`. Desktop and 390x844 mobile
+inspection found no incoherent overlaps or clipped controls. During retry QA,
+the development server later crossed its memory threshold and Turbopack
+auto-restarted with a transient client-manifest 500; clearing only generated
+`.next` output and restarting restored a clean HTTP 200 page. The production
+build above remained clean.
+
+### 2026-08-18 — Phase 5.7 published for Lead review
+
+- Implementation commit `83f44b8` was pushed directly to `feat/frontend-ui`
+  after a second fetch confirmed the remote branch still had the guarded tip
+  `5650ad4dcaa835827a977f59bc109f928e0d3772`.
+- PR #1 is open against `dev` and its description now records the actual scope,
+  fresh checks, rendered UI observations, the incomplete three-row comparison
+  evidence, and the explicit one-time Lead authorization for these commits.
+- No competing branch or PR was opened, and no merge into `dev` or `main` was
+  performed. The merge decision remains with Mohammed Hassan Mahmoud.

@@ -131,12 +131,18 @@ export async function GET() {
   try {
     const { availablePaperIds, unavailablePaperIds } = await agentRag.getCorpusHealth();
     const corpusReady = unavailablePaperIds.length === 0 && availablePaperIds.length > 0;
+    const paperMetadata = await agentRag.getPaperMetadata(availablePaperIds);
+    const papers = availablePaperIds.flatMap((sourceId) => {
+      const paper = paperMetadata.get(sourceId);
+      return paper ? [{ source_id: paper.source_id, title: paper.title }] : [];
+    });
 
     return NextResponse.json({
       status: corpusReady ? "ok" : "error",
       corpus: {
         paper_count: availablePaperIds.length,
         paper_ids: availablePaperIds,
+        papers,
         unavailable_paper_ids: unavailablePaperIds,
       },
       providers: {
@@ -148,7 +154,7 @@ export async function GET() {
     return NextResponse.json(
       {
         status: "error",
-        corpus: { paper_count: 0, paper_ids: [] },
+        corpus: { paper_count: 0, paper_ids: [], papers: [] },
         providers: {
           groq: isProviderConfigured("groq"),
           gemini: isProviderConfigured("gemini"),
