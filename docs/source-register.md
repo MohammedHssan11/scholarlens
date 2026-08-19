@@ -139,9 +139,9 @@ The current corpus does not cover:
 - ✅ Initial corpus contains 10 trusted references.
 - ✅ Every source has a unique `source_id`.
 - ✅ Coverage gaps are documented.
-- ✅ Evaluation test cases reference approved `source_id` values only.
+- ✅ Evaluation test cases reference approved `source_id` values only (the 12-case suite has not yet been formally re-run against the replacement contents for 005–007 and 010).
 - ✅ Author metadata fully verified.
-- ⏳ Licence verification completed.
+- ⏳ Licence/distribution verification remains open; no sign-off is claimed.
 - ✅ Final knowledge corpus approved by the project lead.
 
 **Review status:** Topic and sources approved by **Mohammed Hassan Mahmoud**. On 18 Aug 2026, the Phase 4 replacement rows **005–007** and **010** were verified against arXiv's public API and real fetchable PDF text. Their licence status is not determined here; distribution verification remains open before production release.
