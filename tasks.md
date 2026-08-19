@@ -1805,3 +1805,67 @@ an AI provider for Vercel Preview and redeploy PR #20, or review/merge and
 promote through the normal `dev` then `main` path before the production smoke
 test. The second option still requires a second promotion to `main`; a merge to
 `dev` alone cannot update production.
+
+---
+
+## Phase 7 — Final comprehensive audit against the handbook and our own docs
+
+Context: since the last full audit (Phase 3), a great deal changed — the
+backend actually works with real Groq-backed answers (Phase 6), the corpus
+grew from 6 to 10 real papers (Phase 4), the frontend was completed (Phase
+5), and the app is deployed and live at
+https://scholarlens-nine.vercel.app (verified working end to end,
+2026-08-19). This phase re-verifies the whole project fresh — do not just
+copy forward Phase 3's conclusions, they're outdated in several places.
+
+- [ ] **7.1 — Re-read the handbook fresh.** Open
+  `docs/AI_in_Applications_HANDBOOK (1).xlsx`, sheet "T01 ScholarLens" (all
+  four roles' Personal Acceptance Criteria and Session Gates) and sheet
+  "SCORING RUBRIC" (the 100-point, 9-category breakdown). Extract the real
+  text, don't rely on memory of prior phases' summaries.
+
+- [ ] **7.2 — Score every role's acceptance criteria, item by item, with
+  real evidence.** For Mohammed (Lead), AlBaraa, Mariam Eladawy, and the
+  Product UI role (Doodiiii): each checklist item gets a status (done /
+  partial / missing) and a real citation — a command's actual output, a
+  live URL response, a specific file and line, a specific commit or PR. No
+  item may be marked done on the basis of "it was probably fine" or an
+  older phase's note alone; re-verify anything code- or deployment-related
+  live if it's cheap to do (e.g. hitting the real production URL again).
+
+- [ ] **7.3 — Self-assess against the 9-category SCORING RUBRIC.** For each
+  category (Functional completeness, Architecture & integration, Reliability
+  & test evidence, Security & safe AI behavior, Grounding/tools/AI
+  correctness, Deployment & operations, UX/accessibility/workflow,
+  Documentation & team integration, Individual defense), write what's solid
+  and what's still a real risk, each backed by evidence. Individual defense
+  in particular cannot be marked "done" by you — flag honestly that it
+  requires live human participation from each team member and hasn't
+  happened yet.
+
+- [ ] **7.4 — Cross-check every doc we maintain for staleness**, against
+  the real current repo and the real live production site: `docs/
+  known-limitations.md`, `docs/Lead_Independent_Tasks_Checklist.md`,
+  `docs/architecture.md`, `docs/source-register.md`, `docs/
+  api-contracts.md`, `docs/production-readiness.md`, `tests/
+  acceptance-matrix.md`. For any claim in these files that's now factually
+  wrong (a stale count, a stale URL, a stale "not yet configured" claim
+  that's since been resolved), fix it directly — these are Lead-owned or
+  jointly-owned docs and factual corrections aren't a judgment call. Do NOT
+  invent or resolve anything that's genuinely still an open decision
+  (licence sign-off, Doodiiii's identity, etc.) — just make sure the doc
+  accurately says it's still open.
+
+- [ ] **7.5 — Write one final, dated, standalone status report** —
+  `docs/PROJECT_STATUS.md` — that the Lead can hand directly to Dr. Ahmed
+  or use for defense prep. It should be readable on its own without
+  needing tasks.md's full history: current state in a few sentences, the
+  rubric self-assessment from 7.3, a short "what's left and who owns it"
+  list, and the live production URL with the date it was last verified
+  working.
+
+- [ ] **7.6 — Full verification pass** (all four checks, real output) if
+  you changed any code-adjacent file; a docs-only change still needs
+  `npm run lint` / `npx tsc --noEmit` at minimum to make sure nothing broke.
+  Push, open a PR against `dev`, do not merge. Report back the same way as
+  every other phase.
