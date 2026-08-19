@@ -1,7 +1,9 @@
 # Release evidence — 2026-08-19
 
-**Candidate branch:** `codex/phase-7-comprehensive-audit`  
-**Pull request:** [#25](https://github.com/MohammedHssan11/scholarlens/pull/25) against `dev`  
+**Candidate branch:** `codex/phase-7-comprehensive-audit`
+
+**Pull request:** [#25](https://github.com/MohammedHssan11/scholarlens/pull/25) against `dev`
+
 **Production:** https://scholarlens-nine.vercel.app
 
 This record contains outcomes only. It contains no environment-variable values, provider
