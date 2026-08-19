@@ -25,9 +25,8 @@ Readiness rendered an honest negative result. At 390×844, the production page e
 all 17 controls with no horizontal document overflow.
 
 This is not final release sign-off. Licence/distribution review, the formal 12-case
-provider-backed evaluation, a public/provider-enabled preview or equivalent preview
-evidence, a tagged release, Doodiiii's identity, and live individual defenses remain
-open.
+provider-backed evaluation, a tagged release, Doodiiii's identity, and live individual
+defenses remain open. A protected provider-enabled Phase 7 preview has now been verified.
 
 ## Evidence baseline
 
@@ -61,7 +60,7 @@ missing; **Missing** means no acceptable evidence was found.
 | L3 | Every member has an identifiable contribution merged through review | Partial | PR #8 includes AlBaraa's backend commits; PR #2 includes Mariam Eladawy's knowledge commits; PR #1 includes Doodiiii's UI commits and Lead completion; Lead integration commits are merged. Doodiiii cannot be mapped honestly to handbook member Mariam Ali until the Lead resolves the identity. |
 | L4 | Lint, type-check, tests, and production build complete without unresolved errors | Done | Fresh Phase 7 final run: `npm run lint`, `npx tsc --noEmit`, `npm run build`, and `npx vitest run` all exited 0; see Verification below. |
 | L5 | Environment variables are documented; no secret is committed or exposed | Done | `.env.example:1-9` contains empty server-only variables; `.gitignore:33-53` excludes env files and corpus PDFs; provider keys are read only in `src/lib/ai/providers.ts:103-104,182,281`; the fresh built-client scan found zero provider-key patterns. |
-| L6 | Preview and production URLs complete the main journey | Partial | Public production completes the main journey and was re-verified on 2026-08-19. The prior protected preview was corpus-ready but had no provider configured; there is no reusable provider-enabled preview evidence. |
+| L6 | Preview and production URLs complete the main journey | Done | Public production and the protected `codex/phase-7-comprehensive-audit` preview both completed the 10-paper grounded Ask journey on 2026-08-19; Preview returned literal `paper-010` evidence through Groq. |
 | L7 | Release checklist, limitations, and rollback/recovery notes are present | Done | `docs/release-checklist.md`, `docs/known-limitations.md`, and `docs/production-readiness.md` are present; the latter now records the real environments, observations, open gates, and rollback plan. Presence does not equal final release sign-off. |
 | L8 | Answers are traceable/not-found; comparisons use only selected approved papers | Done | Fresh supported and unsupported production responses; deterministic source/title/verbatim checks in `src/lib/scholarlens/service.ts:113-175`; the live three-selection comparison returned only verified selected rows. |
 
@@ -132,11 +131,11 @@ checks remain open. Session 5 is missing because it requires Mariam's live defen
 | Reliability & test evidence | 11/15 | Fresh lint/type/build/Vitest pass; 84 tests cover schemas, routes, rate limits, provider errors, retrieval, literal verification, tools, and regressions; production positive/negative cases pass. | The handbook's 10-case evaluation is JSON data, not a reproducible provider-backed runner; real timeout and full adversarial outcomes are not demonstrated. |
 | Security & safe AI behavior | 13/15 | Server-only secrets, validation/allowlist, 10/minute rate limit, hashed IPs, redaction, safe errors, bounded corpus, literal snippet verification, ignored PDFs/env files, and zero client-key patterns. | Prompt-injection cases are defined but not re-run as a formal provider-backed adversarial suite; no claim-level semantic entailment checker exists. |
 | Grounding, tools & AI correctness | 9/10 | Approved PDF retrieval, selected-paper/title enforcement, literal snippet verification, safe not-found, and deterministic comparison/readiness have live and automated evidence. | Generated summaries/gaps/limitations are tied to snippets but not independently semantically verified claim by claim. |
-| Deployment & operations | 8/10 | Public Vercel production, custom corpus build, output tracing, root redirect, documented env template, dated health/ask/UI smoke, limitations, and rollback plan. | No reusable provider-enabled preview evidence, tagged release, final release sign-off, or sustained latency/error observation set. |
+| Deployment & operations | 9/10 | Public Vercel production, protected provider-enabled branch preview, custom corpus build, output tracing, root redirect, documented server-only variables, dated local/preview/production smoke, limitations, and rollback plan. | No tagged release, final human release sign-off, or sustained latency/error observation set. |
 | UX, accessibility & workflow quality | 8/10 | Clear action flow, title-backed selector, structured evidence/matrix/readiness, export, loading/error/empty architecture, labelled native controls, and fresh mobile no-overflow evidence. | No independent first-time-user test, automated frontend suite, or complete keyboard/screen-reader audit. |
 | Documentation & team integration | 4/5 | Seven maintained docs are synchronized; setup, contracts, source ownership, PR history, limitations, deployment, and acceptance evidence are explicit. | README still says six papers and assigns frontend to the Lead; v2 diagram assets are untracked; identity and some issue titles/statuses remain stale. |
 | Individual defense | 0/5 | No score can be awarded from code, PRs, or this audit. | The rubric requires each human member to explain/modify their part live. That participation has not happened and cannot be completed by Codex. |
-| **Total** | **79/100** | **Good Prototype** under the handbook score band. | **Not final production/release approval; the open human, licence, evaluation, preview, and release gates still apply.** |
+| **Total** | **80/100** | **Good Prototype** under the handbook score band. | **Not final production/release approval; the open human, licence, evaluation, and release gates still apply.** |
 
 ## What remains and who owns it
 
@@ -148,9 +147,8 @@ checks remain open. Session 5 is missing because it requires Mariam's live defen
    artifacts after correcting or proving the Gemini “live-verified” wording.
 4. **Mohammed Hassan Mahmoud:** authorize a follow-up README correction for the stale
    six-paper count and frontend-owner line; Phase 7 did not permit editing that file.
-5. **Lead/release owner:** obtain provider-enabled preview evidence (or formally document
-   the chosen preview policy), create a tagged release when appropriate, and record final
-   release sign-off.
+5. **Lead/release owner:** create a tagged release when the licence decision permits it
+   and record final human release sign-off.
 6. **Every human team member:** perform the live individual defense/question/change task.
    Until then, Individual defense remains 0/5.
 7. **Optional backend tuning:** improve comparison retrieval/prompt coverage only if it
@@ -178,6 +176,14 @@ Live production checks on the same date:
 - Unsupported quantum-computing question — HTTP 200 `not_found: true`, empty evidence.
 - UI — Ask, Compare, Readiness, and export controls present; the three-selected-paper
   comparison rendered two verified rows; readiness rendered a correct negative result.
+
+Protected Preview checks on the same date:
+
+- Groq and Gemini were stored as sensitive variables scoped only to
+  `codex/phase-7-comprehensive-audit`; the separate Production entries remained intact.
+- Preview deployment `GnNDKtKo6N46BqGDdQNCzsu941K9` built commit `a1d40e0` successfully.
+- The authenticated UI loaded all 10 papers and returned one high-confidence literal
+  `paper-010` snippet with `groq / approved sources`.
 - Responsive check — 390×844, no horizontal document/body overflow.
 
 These checks establish the technical state recorded above. They do not resolve the

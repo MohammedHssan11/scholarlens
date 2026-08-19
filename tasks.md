@@ -1955,3 +1955,18 @@ pushed and a PR against `dev` was opened; no merge was authorized.
 - No merge into `dev` or `main` was performed. The merge, release, licence, identity,
   diagram-publication, evaluation, and human-defense decisions remain with their stated
   owners.
+
+### 2026-08-19 — Post-audit provider-enabled Preview verification
+
+- With explicit Lead confirmation, copied the existing local Groq and Gemini values into
+  new sensitive Vercel variables scoped only to `codex/phase-7-comprehensive-audit`.
+  The separate Production variables remained present and unchanged; no value was printed
+  or committed.
+- Redeployed PR #25 commit `a1d40e0` as Preview deployment
+  `GnNDKtKo6N46BqGDdQNCzsu941K9`; Vercel reported Ready after a 34-second build.
+- The authenticated protected Preview loaded all 10 paper titles. A real `paper-010`
+  GraphRAG Ask rendered one high-confidence literal source snippet with
+  `groq / approved sources`.
+- Deployment & operations increases from 8/10 to 9/10. The evidence-based total is now
+  **80/100 (Good Prototype)**. No score is added for a tagged release, evaluation run,
+  licence approval, or individual defense because those gates remain open.

@@ -66,8 +66,9 @@ File Search store or separate metadata database is used by the current prototype
 Production is deployed from `main` at https://scholarlens-nine.vercel.app. On
 2026-08-19, fresh checks observed the root redirect, the 10-paper UI, a health response
 with all papers available, a Groq-backed grounded answer, a selected-paper comparison,
-and a readiness result. The protected Phase 6 preview proved corpus packaging but did not
-have provider configuration; no tagged release or human release sign-off is claimed.
+and a readiness result. A protected Phase 7 branch preview was subsequently configured
+with branch-scoped providers and returned grounded `paper-010` evidence through Groq.
+No tagged release or human release sign-off is claimed.
 
 ## External services (approved)
 

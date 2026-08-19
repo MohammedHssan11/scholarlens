@@ -23,11 +23,12 @@ verification; unresolved decisions remain unchecked.
 - [x] **Restored and deployed the production API** — [PR #20](https://github.com/MohammedHssan11/scholarlens/pull/20) fixed the Vercel PDF-parser/corpus packaging defects; PR #21 promoted it to `main`.
 - [x] **Fixed the public root route** — [PR #22](https://github.com/MohammedHssan11/scholarlens/pull/22) redirects `/` to `/scholarlens`; PR #23 promoted it to production.
 - [x] **Re-verified public production on 2026-08-19** — health returned 10/10 papers and both provider flags; a real GraphRAG ask returned HTTP 200 with `provider_used: "groq"`; Ask, Compare, and Readiness rendered in the live UI.
+- [x] **Verified a provider-enabled protected preview on 2026-08-19** — Groq and Gemini were added as sensitive variables scoped only to `codex/phase-7-comprehensive-audit`; Production variables remained intact; redeployed Preview loaded 10 papers and returned literal `paper-010` evidence through Groq.
 
 ## Needs your own input (not something I can do for you)
 
 - [ ] **Confirm who `Doodiiii` actually is** — Mariam Ali, a new member, or someone else. This account has now delivered the entire product UI, which makes the question more relevant, not less. Tracked in [issue #10](https://github.com/MohammedHssan11/scholarlens/issues/10).
-- [ ] **Complete preview/tagged-release/final sign-off evidence** — public production now works and is dated below, but the prior protected preview lacked provider configuration and no tagged release or human release sign-off exists. Tracked in [issue #10](https://github.com/MohammedHssan11/scholarlens/issues/10).
+- [ ] **Complete tagged-release/final sign-off evidence** — public production and the provider-enabled protected preview now work, but no tagged release or human release sign-off exists. Tracked in [issue #10](https://github.com/MohammedHssan11/scholarlens/issues/10).
 - [ ] **Publish and review the regenerated architecture PDF** — the local v2 PDF now shows TF-IDF, 10 papers, the real UI, and production, but it is untracked. Review the unverified “Gemini ... live-verified” wording before deciding whether to add it to a separate authorized PR.
 - [ ] **Resolve the remaining active-corpus/source decisions with Mariam Eladawy** — licence/URL verification for the 4 Phase 4 papers, reconciling the evaluation-case suite against them, and the missing one-page research rubric. Tracked in [issue #9](https://github.com/MohammedHssan11/scholarlens/issues/9).
 - [ ] **Obtain individual defense evidence** — every member must explain and modify the part they own; this requires live human participation and cannot be inferred from commits.
@@ -37,5 +38,5 @@ verification; unresolved decisions remain unchecked.
 
 1. Run and record the complete "3 questions, compare 3 papers" defense demo with the human team; the app works, but the live individual-defense evidence still does not exist.
 2. Coordinate [issue #9](https://github.com/MohammedHssan11/scholarlens/issues/9) with Mariam Eladawy (licence checks + evaluation-suite reconciliation against the Phase 4 papers).
-3. Complete the remaining Lead-owned items in [issue #10](https://github.com/MohammedHssan11/scholarlens/issues/10): preview/tagged-release sign-off, architecture-PDF publication review, and Doodiiii's identity.
+3. Complete the remaining Lead-owned items in [issue #10](https://github.com/MohammedHssan11/scholarlens/issues/10): tagged-release sign-off, architecture-PDF publication review, and Doodiiii's identity.
 4. Close or rewrite stale issue #5, and authorize a follow-up README correction (the tracked setup text still says six papers).

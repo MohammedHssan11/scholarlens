@@ -39,18 +39,31 @@ the smoke checks.
 | API Ask | HTTP 200; `not_found: false`; 1 `paper-010` evidence item through Groq |
 | Visible Ask journey | Loaded all 10 titled papers, selected `paper-010`, and rendered one high-confidence result with a literal source snippet and Groq attribution |
 
+## Provider-enabled Preview smoke
+
+The sensitive provider values were added without displaying them and scoped only to
+`codex/phase-7-comprehensive-audit`. The pre-existing Production variables remained intact.
+Vercel redeployed commit `a1d40e0` as protected Preview deployment
+`GnNDKtKo6N46BqGDdQNCzsu941K9`.
+
+| Check | Result |
+|---|---|
+| Deployment | Ready after a 34-second build; Environment `Preview`; source branch and commit matched PR #25 |
+| Corpus/UI | Authenticated UI loaded all 10 titled papers |
+| Grounded Ask | Selected `paper-010`; one high-confidence result rendered through Groq with a literal map-reduce community-summary snippet |
+| Secret scope | Groq and Gemini entries show `Preview` plus the exact Phase 7 branch; separate Production entries remain present |
+
 ## GitHub and Vercel state
 
 - PR #25 is open as a draft against `dev` and was mergeable when checked.
 - Its GitHub CI, GitGuardian, Vercel deployment, and Vercel Preview Comments checks were green
   before this evidence update.
-- The Vercel preview URL exists but returned HTTP 302 to Vercel SSO. Provider configuration
-  and the end-to-end preview journey therefore remain unverified for this release candidate.
+- The Vercel preview remains protected by SSO. Its authenticated provider-backed journey is
+  now verified; it is intentionally not claimed as a public anonymous URL.
 - No GitHub release or repository tag existed when checked.
 
 ## Gates that remain open
 
-- Provider-enabled preview configuration and end-to-end preview smoke.
 - Corpus licence/distribution sign-off.
 - Independent human release approval and live individual defenses.
 - Executable, recorded provider-backed run of the version-2 12-case evaluation dataset.
