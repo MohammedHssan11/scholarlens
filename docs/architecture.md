@@ -2,8 +2,10 @@
 
 **Owner:** Mohammed Hassan Mahmoud (Integration Lead / Solution Architect)
 
-Diagrams: `arch_1_simple.png`, `arch_2_detailed.png`, `arch_3_product.png`
-(see the team briefing pack).
+Diagrams: `arch_1_simple.png`, `arch_2_detailed.png`, `arch_3_product.png`, and
+`ScholarLens_Architecture.pdf` (v2). The locally available v2 artifacts were rendered and
+reviewed on 2026-08-19 and reflect the deployed TF-IDF/10-paper system, but they are
+untracked in this checkout and are not part of the Phase 7 documentation PR.
 
 ## End-to-end flow
 
@@ -32,7 +34,7 @@ sent to the browser or included in the client bundle.
 | UI / workflow | `src/app/scholarlens/`, `src/components/` | GitHub: Doodiiii (identity to be confirmed — see Team changes) |
 | API + validation | `src/app/api/scholarlens/route.ts`, `src/lib/scholarlens/schema.ts` | AlBaraa |
 | AI providers | `src/lib/ai/providers.ts` | AlBaraa |
-| Grounding / retrieval | `src/lib/scholarlens/service.ts` | AlBaraa |
+| Grounding / retrieval | `src/lib/scholarlens/service.ts`, `src/lib/scholarlens/agent-rag.ts` | AlBaraa |
 | Deterministic tools | `src/lib/scholarlens/tools.ts` | AlBaraa (wiring) |
 | Tool rules / taxonomy | `src/lib/scholarlens/tool-rules.ts`, `taxonomy.ts` | Mariam Eladawy |
 | Approved corpus | `data/corpus/`, `docs/source-register.md` | Mariam Eladawy |
@@ -43,8 +45,9 @@ sent to the browser or included in the client bundle.
 - **Ahmed Mossad Elgammal** (Evaluation & Production) withdrew. Work redistributed with
   Dr. Ahmed's approval.
 - **Mariam Ali Ahmed** (Product UI & Workflow) was recorded as withdrawn as of 2026-07-23.
-  This is now unclear: `feat/frontend-ui` has active, ongoing commits and an open PR,
-  all authored by GitHub account **Doodiiii** (`alidreasydody@gmail.com`) — an email that
+  The identity mapping remains unclear: GitHub account **Doodiiii** (`alidreasydody@gmail.com`)
+  authored the initial frontend commits, and PR #1 was later completed under explicit Lead
+  authorization and merged into `dev` on 2026-08-18. That email
   doesn't match Mariam Ali's contact email on file. **Open action for the Lead:** confirm
   whether Doodiiii is Mariam Ali, a new member, or someone else, and update this doc once
   known.
@@ -57,6 +60,14 @@ Mohammed Hassan Mahmoud approved the provider-neutral local TF-IDF retrieval str
 `agent-rag.ts` retrieves the same source-labelled chunks before either Groq or Gemini is
 called, so both generation providers use the same bounded evidence context. No Gemini
 File Search store or separate metadata database is used by the current prototype.
+
+## Deployment state
+
+Production is deployed from `main` at https://scholarlens-nine.vercel.app. On
+2026-08-19, fresh checks observed the root redirect, the 10-paper UI, a health response
+with all papers available, a Groq-backed grounded answer, a selected-paper comparison,
+and a readiness result. The protected Phase 6 preview proved corpus packaging but did not
+have provider configuration; no tagged release or human release sign-off is claimed.
 
 ## External services (approved)
 

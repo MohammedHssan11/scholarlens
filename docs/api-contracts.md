@@ -17,26 +17,40 @@ entry has a non-empty local content file; otherwise it returns HTTP 503.
 {
   "status": "ok",
   "corpus": {
-    "paper_count": 6,
+    "paper_count": 10,
     "paper_ids": [
       "paper-001",
       "paper-002",
       "paper-003",
       "paper-004",
+      "paper-005",
+      "paper-006",
+      "paper-007",
       "paper-008",
-      "paper-009"
+      "paper-009",
+      "paper-010"
+    ],
+    "papers": [
+      {
+        "source_id": "paper-010",
+        "title": "From Local to Global: A Graph RAG Approach to Query-Focused Summarization"
+      }
     ],
     "unavailable_paper_ids": []
   },
   "providers": {
-    "groq": false,
-    "gemini": false
+    "groq": true,
+    "gemini": true
   }
 }
 ```
 
 Provider flags report configuration presence only. They do not expose keys and do not
 prove that a provider request will succeed.
+
+The `papers` array contains one `{ source_id, title }` object for every available paper;
+only one representative object is shown above to keep the example compact. The values
+shown were re-observed in production on 2026-08-19.
 
 ---
 
@@ -61,8 +75,8 @@ The single endpoint for all ScholarLens actions. It dispatches to specific sub-s
 ```json
 {
   "action": "ask",
-  "question": "What methods are used to measure reading comprehension in primary school students?",
-  "paper_ids": ["paper-001", "paper-002"]
+  "question": "What approach does this paper propose for global query-focused summarization?",
+  "paper_ids": ["paper-010"]
 }
 ```
 

@@ -7,8 +7,8 @@
 | Environment | Branch | URL |
 |---|---|---|
 | Local | any | http://localhost:3000 |
-| Preview | `dev` / PRs | _(fill in)_ |
-| Production | `main` | _(fill in)_ |
+| Preview | PRs | Phase 6 protected preview was authenticated and corpus-ready, but had no provider configured; no reusable public preview URL is claimed. |
+| Production | `main` | https://scholarlens-nine.vercel.app |
 
 ## Environment variables
 
@@ -19,6 +19,15 @@ See `.env.example`. All are **server-side only** — never prefixed with `NEXT_P
 | Date | Environment | Observation (latency / errors) |
 |---|---|---|
 | 2026-08-17 | Local | Health returned HTTP 200 with 6/6 manifest papers available. Groq and Gemini flags were both false. Three ask requests plus compare and readiness each retrieved 8 real corpus chunks, then returned the safe HTTP 504 `PROVIDER_ERROR`. This is not a successful provider or release smoke test. |
+| 2026-08-19 | Vercel Preview | Authenticated health returned 10/10 papers after the PDF-parser/corpus packaging fix. Both provider flags were false, so the grounded ask ended in the clean `PROVIDER_ERROR`; this was not a successful AI smoke test. |
+| 2026-08-19 | Production | Fresh public health returned HTTP 200 with 10/10 papers, no unavailable IDs, and Groq/Gemini configuration flags true. A GraphRAG ask returned HTTP 200, one high-confidence literal source snippet, and `provider_used: "groq"`. The live UI also rendered Ask, a three-selected-paper/two-verified-row comparison, and a correctly negative readiness result. A 390×844 audit had no horizontal overflow. |
+
+## Release status
+
+The public beta is working, but final release sign-off remains open. There is no tagged
+release, the formal 12-case evaluation has not been re-run against the expanded corpus,
+licence/distribution sign-off is unresolved, Doodiiii's identity is unresolved, and the
+required live individual defenses have not happened.
 
 ## Rollback plan
 

@@ -1818,13 +1818,13 @@ https://scholarlens-nine.vercel.app (verified working end to end,
 2026-08-19). This phase re-verifies the whole project fresh — do not just
 copy forward Phase 3's conclusions, they're outdated in several places.
 
-- [ ] **7.1 — Re-read the handbook fresh.** Open
+- [x] **7.1 — Re-read the handbook fresh.** Open
   `docs/AI_in_Applications_HANDBOOK (1).xlsx`, sheet "T01 ScholarLens" (all
   four roles' Personal Acceptance Criteria and Session Gates) and sheet
   "SCORING RUBRIC" (the 100-point, 9-category breakdown). Extract the real
   text, don't rely on memory of prior phases' summaries.
 
-- [ ] **7.2 — Score every role's acceptance criteria, item by item, with
+- [x] **7.2 — Score every role's acceptance criteria, item by item, with
   real evidence.** For Mohammed (Lead), AlBaraa, Mariam Eladawy, and the
   Product UI role (Doodiiii): each checklist item gets a status (done /
   partial / missing) and a real citation — a command's actual output, a
@@ -1833,7 +1833,7 @@ copy forward Phase 3's conclusions, they're outdated in several places.
   older phase's note alone; re-verify anything code- or deployment-related
   live if it's cheap to do (e.g. hitting the real production URL again).
 
-- [ ] **7.3 — Self-assess against the 9-category SCORING RUBRIC.** For each
+- [x] **7.3 — Self-assess against the 9-category SCORING RUBRIC.** For each
   category (Functional completeness, Architecture & integration, Reliability
   & test evidence, Security & safe AI behavior, Grounding/tools/AI
   correctness, Deployment & operations, UX/accessibility/workflow,
@@ -1843,7 +1843,7 @@ copy forward Phase 3's conclusions, they're outdated in several places.
   requires live human participation from each team member and hasn't
   happened yet.
 
-- [ ] **7.4 — Cross-check every doc we maintain for staleness**, against
+- [x] **7.4 — Cross-check every doc we maintain for staleness**, against
   the real current repo and the real live production site: `docs/
   known-limitations.md`, `docs/Lead_Independent_Tasks_Checklist.md`,
   `docs/architecture.md`, `docs/source-register.md`, `docs/
@@ -1856,7 +1856,7 @@ copy forward Phase 3's conclusions, they're outdated in several places.
   (licence sign-off, Doodiiii's identity, etc.) — just make sure the doc
   accurately says it's still open.
 
-- [ ] **7.5 — Write one final, dated, standalone status report** —
+- [x] **7.5 — Write one final, dated, standalone status report** —
   `docs/PROJECT_STATUS.md` — that the Lead can hand directly to Dr. Ahmed
   or use for defense prep. It should be readable on its own without
   needing tasks.md's full history: current state in a few sentences, the
@@ -1869,3 +1869,76 @@ copy forward Phase 3's conclusions, they're outdated in several places.
   `npm run lint` / `npx tsc --noEmit` at minimum to make sure nothing broke.
   Push, open a PR against `dev`, do not merge. Report back the same way as
   every other phase.
+
+### 2026-08-19 — Phase 7.1–7.5 fresh audit and verification
+
+- Extracted the current handbook cells directly from the workbook: four current roles'
+  session gates/personal criteria from `T01 ScholarLens`, and all nine 100-point categories
+  from `SCORING RUBRIC`. No Phase 3 score was copied forward.
+- Re-verified production at `https://scholarlens-nine.vercel.app`. Health returned HTTP
+  200 with 10/10 papers, no unavailable IDs, and Groq/Gemini configuration flags true. A
+  real `paper-010` ask returned HTTP 200 with literal evidence and
+  `provider_used: "groq"`. Empty, unknown-paper, and malformed requests returned safe 400
+  responses; an unsupported question returned `not_found: true` with empty evidence.
+- Exercised Ask, Compare, and Readiness in the rendered production UI. Three selected
+  papers produced two verified comparison rows; the unsupported third row was omitted.
+  Readiness rendered an honest negative result. At 390×844, all 17 controls were present
+  and document/body scroll width matched client width (375px), so no horizontal overflow
+  was observed.
+- Rendered and inspected all three pages of the local architecture PDF v2. It now reflects
+  TF-IDF, 10 papers, the working UI, and production; it is untracked, and its Gemini
+  “live-verified” wording was not treated as proven by the Groq success run.
+- Corrected all seven maintained files named by 7.4 and created the standalone
+  `docs/PROJECT_STATUS.md`. The evidence-based rubric score is **79/100 (Good Prototype)**;
+  Individual defense is **0/5** because no live human defense has occurred.
+- Preserved the genuinely open decisions: corpus licence/distribution sign-off, formal
+  12-case provider-backed evaluation, Doodiiii's identity, diagram publication wording,
+  provider-enabled preview/tagged-release sign-off, and every member's live defense.
+- `README.md` remains factually stale about the six-paper fetch and frontend owner, but it
+  was outside Phase 7's explicit edit list; the follow-up is recorded instead of silently
+  expanding scope.
+
+Fresh checks from the repository root:
+
+`npm run lint` (exit 0):
+
+```text
+> scholarlens-app@0.1.0 lint
+> eslint
+```
+
+`npx tsc --noEmit` (exit 0): no output.
+
+`npm run build` (exit 0):
+
+```text
+▲ Next.js 16.2.11 (Turbopack)
+✓ Compiled successfully in 4.5s
+✓ Generating static pages using 7 workers (6/6) in 624ms
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ƒ /api/scholarlens
+└ ○ /scholarlens
+```
+
+`npx vitest run` (exit 0):
+
+```text
+Test Files  8 passed (8)
+     Tests  84 passed (84)
+  Duration  2.11s
+```
+
+Post-build evidence:
+
+```text
+CLIENT_BUNDLE_SECRET_PATTERN_MATCHES=0
+git diff --check: exit 0
+```
+
+Only the eight authorized report/maintained-doc files plus `tasks.md` are intended for
+the Phase 7 commit. The handbook, PDFs, PNGs, `output/`, and `tmp/` remain untracked and
+must not be staged. Item 7.6 remains open until the branch is pushed and a PR against
+`dev` is opened; no merge is authorized.
