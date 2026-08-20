@@ -1,50 +1,278 @@
 @import "tailwindcss";
 
-:root {
-  --background: #0b1020;
-  --foreground: #e2e8f0;
+/* ═══════════════════════════════════════════════════════════════
+   ScholarLens design system — "refined dark lab"
+   Owner: Mohammed Hassan Mahmoud (Integration Lead)
+
+   Principle: the interface must make TRUST visible. The verified
+   source quote is the hero of every screen; everything else is
+   quieter than it is.
+   ═══════════════════════════════════════════════════════════════ */
+
+@theme {
+  /* ── Surfaces: a real elevation ladder, not one flat colour ── */
+  --color-ink-950: #070b16; /* page background            */
+  --color-ink-900: #0b1223; /* base panels                */
+  --color-ink-850: #101a30; /* raised cards               */
+  --color-ink-800: #16223c; /* hover / inputs             */
+  --color-ink-700: #1e2c4a; /* borders (strong)           */
+  --color-ink-600: #2a3b5f; /* borders (interactive)      */
+
+  /* ── Text ─────────────────────────────────────────────────── */
+  --color-paper-50: #eef2fb; /* primary text              */
+  --color-paper-200: #b6c2d9; /* secondary text           */
+  --color-paper-400: #7d8CA8; /* muted / meta             */
+  --color-paper-600: #56637d; /* faint labels             */
+
+  /* ── Accents ──────────────────────────────────────────────── */
+  --color-signal-400: #34d399; /* action / success        */
+  --color-signal-500: #10b981;
+  --color-signal-600: #059669;
+
+  --color-cite-300: #a5b4fc; /* evidence / citation      */
+  --color-cite-400: #818cf8;
+  --color-cite-500: #6366f1;
+
+  --color-warn-300: #fcd34d;
+  --color-warn-400: #fbbf24;
+  --color-alert-300: #fca5a5;
+  --color-alert-400: #f87171;
+
+  /* ── Type scale ───────────────────────────────────────────── */
+  --text-display: 2rem; /* 32 — page title      */
+  --text-title: 1.25rem; /* 20 — section title   */
+  --text-lead: 0.9375rem; /* 15 — body           */
+  --text-meta: 0.8125rem; /* 13 — secondary      */
+  --text-micro: 0.6875rem; /* 11 — labels/chips  */
+
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "SF Mono", monospace;
+  /* Reserved exclusively for text quoted from a source paper. */
+  --font-quote: var(--font-newsreader), ui-serif, Georgia, serif;
+
+  --radius-card: 14px;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+/* ── Base ───────────────────────────────────────────────────── */
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-ink-950);
+  color: var(--color-paper-50);
+  /* NOTE: this previously hard-coded Arial, which silently threw away
+     the Geist font loaded in layout.tsx. */
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
 }
 
-/* Entrance animation for result cards */
+::selection {
+  background: color-mix(in srgb, var(--color-cite-500) 40%, transparent);
+  color: var(--color-paper-50);
+}
+
+/* Consistent, visible keyboard focus everywhere */
+:focus-visible {
+  outline: 2px solid var(--color-signal-400);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ── Ambient background ──────────────────────────────────────
+   Painted as fixed background layers on the body itself rather than a
+   negative-z pseudo-element, which would sit behind the body's own
+   background colour and never be seen. */
+.sl-aurora {
+  background-image:
+    radial-gradient(
+      54rem 34rem at 12% -6%,
+      color-mix(in srgb, var(--color-cite-500) 20%, transparent),
+      transparent 68%
+    ),
+    radial-gradient(
+      46rem 30rem at 98% 2%,
+      color-mix(in srgb, var(--color-signal-500) 13%, transparent),
+      transparent 66%
+    ),
+    radial-gradient(
+      40rem 40rem at 50% 120%,
+      color-mix(in srgb, var(--color-cite-500) 9%, transparent),
+      transparent 70%
+    );
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+}
+
+/* ═══ Materials ══════════════════════════════════════════════
+   A surface should read as lit from above: a hairline highlight on
+   the top edge, and a barely-there gradient down the face. This is
+   what separates a "box" from a crafted panel.
+   ═══════════════════════════════════════════════════════════ */
+
+.sl-panel {
+  position: relative;
+  background-image: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.045),
+    rgba(255, 255, 255, 0) 42%
+  );
+}
+
+.sl-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 1px;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.16) 22%,
+    rgba(255, 255, 255, 0.16) 78%,
+    transparent
+  );
+}
+
+/* The evidence chain: a hairline spine linking each numbered claim. */
+.sl-chain {
+  position: relative;
+}
+.sl-chain::before {
+  content: "";
+  position: absolute;
+  left: 27px;
+  top: 14px;
+  bottom: 14px;
+  width: 1px;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    transparent,
+    var(--color-ink-700) 8%,
+    var(--color-ink-700) 92%,
+    transparent
+  );
+}
+@media (max-width: 640px) {
+  .sl-chain::before {
+    display: none;
+  }
+}
+
+/* Question terms found inside a quote — shows WHY the passage matched. */
+mark.sl-term {
+  background: color-mix(in srgb, var(--color-cite-500) 26%, transparent);
+  color: var(--color-paper-50);
+  border-radius: 3px;
+  padding: 0.05em 0.16em;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+/* ── Refined scrollbars (rail + results) ────────────────────── */
+.sl-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-ink-700) transparent;
+}
+.sl-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+.sl-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.sl-scroll::-webkit-scrollbar-thumb {
+  background: var(--color-ink-700);
+  border-radius: 999px;
+}
+.sl-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--color-ink-600);
+}
+
+/* ── Motion ─────────────────────────────────────────────────── */
+
 @keyframes fade-slide-in {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
     transform: translateY(0);
   }
 }
-
 .animate-fade-slide-in {
-  animation: fade-slide-in 0.35s ease-out both;
+  animation: fade-slide-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-/* Skeleton shimmer for loading state */
 @keyframes skeleton-pulse {
   0%,
   100% {
     opacity: 1;
   }
   50% {
-    opacity: 0.55;
+    opacity: 0.5;
   }
 }
-
 .animate-skeleton {
-  animation: skeleton-pulse 1.5s ease-in-out infinite;
+  animation: skeleton-pulse 1.6s ease-in-out infinite;
+}
+
+/* Sweep used on the loading state — suggests scanning the corpus */
+@keyframes sl-sweep {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(200%);
+  }
+}
+.animate-sweep {
+  animation: sl-sweep 1.8s ease-in-out infinite;
+}
+
+/* The verified-quote badge breathes once on arrival, then settles */
+@keyframes sl-verify-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.04);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+.animate-verify {
+  animation: sl-verify-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Stagger helper for lists of results */
+.sl-stagger > * {
+  animation: fade-slide-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.sl-stagger > *:nth-child(1) {
+  animation-delay: 0.02s;
+}
+.sl-stagger > *:nth-child(2) {
+  animation-delay: 0.08s;
+}
+.sl-stagger > *:nth-child(3) {
+  animation-delay: 0.14s;
+}
+.sl-stagger > *:nth-child(4) {
+  animation-delay: 0.2s;
+}
+.sl-stagger > *:nth-child(n + 5) {
+  animation-delay: 0.26s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-slide-in,
+  .animate-skeleton,
+  .animate-sweep,
+  .animate-verify,
+  .sl-stagger > * {
+    animation: none !important;
+  }
 }
